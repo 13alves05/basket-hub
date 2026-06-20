@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: layout('Jogadores', ~{::section})}">
+<section>
+    <!-- Card Principal do Plantel (Estilo Premium) -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Plantel de Jogadores</h2>
+            <button class="btn" onclick="openModal('add')">
+                <i class="fa-solid fa-plus"></i> Novo Jogador
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-hub" id="jogadoresTable">
+                <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Nome do Atleta</th>
+                    <th style="width: 180px;">Posição</th>
+                    <th style="width: 140px;">Nº Camisola</th>
+                    <th style="width: 100px; text-align: center;">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Carregamento Dinâmico via API -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Janela Modal Customizada e Fluida -->
+    <div class="modal-overlay" id="jogadorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center;">
+        <div class="modal" style="background: var(--bg-card); width: 100%; max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
+
+            <div class="modal-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                <h3 id="modalTitle" style="font-size: 18px; font-weight: 700;">Novo Jogador</h3>
+                <button class="btn-icon" data-dismiss="modal" style="font-size: 18px; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body" style="padding: 24px;">
+                <form id="jogadorForm" onsubmit="event.preventDefault();">
+                    <input type="hidden" id="jogadorId">
+
+                    <div class="modal-form-group" style="margin-bottom: 16px;">
+                        <label>Nome Completo</label>
+                        <input type="text" id="nome" required maxlength="100" placeholder="Ex: Ticha Penicheiro">
+                    </div>
+
+                    <!-- Linha dupla para otimização de espaço na modal -->
+                    <div class="flex-form-row" style="display: flex; gap: 16px;">
+                        <div class="modal-form-group" style="flex: 1;">
+                            <label>Posição em Campo</label>
+                            <select id="posicao" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #fff; font-size: 14px;">
+                                <option value="" disabled selected>-- Selecione... --</option>
+                                <option value="Base">Base (PG)</option>
+                                <option value="Extremo">Extremo (SG/SF)</option>
+                                <option value="Poste">Poste (PF/C)</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-form-group" style="width: 130px;">
+                            <label>Nº Camisola</label>
+                            <input type="number" id="n_camisola" required min="0" max="99" placeholder="Ex: 23">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer" style="padding: 16px 24px; background-color: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn" data-dismiss="modal" style="background-color: #e2e8f0; color: #334155;">Cancelar</button>
+                <button class="btn" onclick="saveJogador()">Guardar Atleta</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Controlador nativo para gestão da Janela Modal
+        const modalElement = document.getElementById('jogadorModal');
+        const modal = {
+            open: () => { modalElement.style.display = 'flex'; },
+            close: () => { modalElement.style.display = 'none'; }
+        };
+
+        // Vincula o fecho automático a todos os botões de fecho da modal
+        document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+            btn.addEventListener('click', () => modal.close());
+        });
+
+        let currentMode = 'add';
+
+        async function loadJogadores() {
+            const tbody = document.querySelector('#jogadoresTable tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> A atualizar plantel de atletas...</td></tr>';
+            try {
+                const jogadores = await apiCall('/jogadores');
+
+                if (jogadores.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 24px;"><i class="fa-solid fa-user-slash"></i> Nenhum jogador registado no plantel atual.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = jogadores.map(j => {
+                    // Mapeamento de cores de badges por posição para enriquecimento visual
+                    let badgeClass = 'badge-status';
+                    if (j.posicao === 'Base') badgeClass = 'badge-primary';
+
+                    return `
+                        <tr>
+                            <td><code style="font-weight:600; color:var(--text-muted);">${j.id}</code></td>
+                            <td><strong>${j.nome}</strong></td>
+                            <td><span class="badge ${badgeClass}" style="font-weight:600;">${j.posicao}</span></td>
+                            <td><strong style="color: var(--primary); font-family: monospace; font-size: 15px;">#${j.n_camisola}</strong></td>
+                            <td>
+                                <div class="actions-cell" style="justify-content: center;">
+                                    <button class="btn-icon" onclick="openModal('edit', ${j.id})" title="Editar Ficha"><i class="fa-solid fa-pen" style="color: var(--primary);"></i></button>
+                                    <button class="btn-icon delete" onclick="deleteJogador(${j.id})" title="Dispensar Atleta"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger); padding: 24px;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao estabelecer ligação para carregar os jogadores.</td></tr>';
+            }
+        }
+
+        async function openModal(mode, id = null) {
+            currentMode = mode;
+            document.getElementById('jogadorForm').reset();
+            document.getElementById('modalTitle').innerText = mode === 'add' ? 'Novo Jogador' : 'Editar Ficha do Atleta';
+
+            if (mode === 'edit') {
+                try {
+                    const j = await apiCall(`/jogadores/${id}`);
+                    document.getElementById('jogadorId').value = j.id;
+                    document.getElementById('nome').value = j.nome;
+                    document.getElementById('posicao').value = j.posicao;
+                    document.getElementById('n_camisola').value = j.n_camisola;
+                } catch (e) {
+                    alert('Não foi possível obter os dados do atleta selecionado.');
+                    return;
+                }
+            }
+            modal.open();
+        }
+
+        async function saveJogador() {
+            const form = document.getElementById('jogadorForm');
+            if(!form.checkValidity()) { form.reportValidity(); return; }
+
+            const data = {
+                nome: document.getElementById('nome').value,
+                posicao: document.getElementById('posicao').value,
+                n_camisola: parseInt(document.getElementById('n_camisola').value, 10)
+            };
+
+            const id = document.getElementById('jogadorId').value;
+            try {
+                if (currentMode === 'add') {
+                    await apiCall('/jogadores', 'POST', data);
+                } else {
+                    await apiCall(`/jogadores/${id}`, 'PUT', data);
+                }
+                modal.close();
+                loadJogadores();
+            } catch (e) {
+                alert('Ocorreu um erro ao tentar salvar a ficha do jogador.');
+            }
+        }
+
+        async function deleteJogador(id) {
+            if (confirm('Tem a certeza absoluta que deseja remover este jogador do plantel ativo?')) {
+                try {
+                    await apiCall(`/jogadores/${id}`, 'DELETE');
+                    loadJogadores();
+                } catch (e) {
+                    alert('Não foi possível remover o jogador. Verifique se ele possui vínculos ou estatísticas ativas.');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadJogadores);
+    </script>
+</section>
+</html>

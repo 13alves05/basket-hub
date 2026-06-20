@@ -1,0 +1,57 @@
+<aside class="sidebar" th:fragment="sidebar">
+    <div class="brand">
+        <i class="fa-solid fa-basketball"></i>
+        <span>BasketHub</span>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="/" class="nav-link" data-target="dashboard">
+            <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        <a href="/equipas" class="nav-link" data-target="equipas">
+            <i class="fa-solid fa-shield-halved"></i> <span>Equipas</span>
+        </a>
+        <a href="/jogadores" class="nav-link" data-target="jogadores">
+            <i class="fa-solid fa-users"></i> <span>Jogadores</span>
+        </a>
+        <a href="/eventos" class="nav-link" data-target="eventos">
+            <i class="fa-solid fa-calendar-days"></i> <span>Eventos</span>
+        </a>
+        <a href="/jogos" class="nav-link" data-target="jogos">
+            <i class="fa-solid fa-stopwatch"></i> <span>Jogos</span>
+        </a>
+        <a href="/pavilhoes" class="nav-link" data-target="pavilhoes">
+            <i class="fa-solid fa-building"></i> <span>Pavilhões</span>
+        </a>
+        <a href="/organizadores" class="nav-link" data-target="organizadores">
+            <i class="fa-solid fa-user-tie"></i> <span>Organizadores</span>
+        </a>
+        <a href="/patrocinadores" class="nav-link" data-target="patrocinadores">
+            <i class="fa-solid fa-handshake"></i> <span>Patrocinadores</span>
+        </a>
+        <a href="/inscricoes" class="nav-link" data-target="inscricoes">
+            <i class="fa-solid fa-file-signature"></i> <span>Inscrições</span>
+        </a>
+        <a href="/classificacoes" class="nav-link" data-target="classificacoes">
+            <i class="fa-solid fa-list-ol"></i> <span>Classificações</span>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentPath = window.location.pathname;
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active'); // Limpeza preventiva
+                const linkHref = link.getAttribute('href');
+
+                // Validação inteligente para evitar falsos positivos na raiz do sistema
+                if (linkHref === '/' && currentPath === '/') {
+                    link.classList.add('active');
+                } else if (linkHref !== '/' && (currentPath === linkHref || currentPath.startsWith(linkHref + '/'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</aside>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title : 'Painel'} + ' | BasketHub'">BasketHub</title>
+
+    <!-- Tipografia e Ícones Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Estilos Globais do Sistema -->
+    <link rel="stylesheet" th:href="@{/static/main.css}">
+</head>
+<body>
+<!-- Wrapper principal alinhado com a grelha flexível do main.css -->
+<div class="app-container">
+
+    <!-- Injeção Dinâmica da Sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+    <!-- Área de Conteúdo de Extensão à Direita -->
+    <main class="main-content">
+
+        <!-- Injeção Dinâmica da Barra Superior com Correção OGNL de Título -->
+        <th:block th:replace="~{fragments/navbar :: navbar(${title != null ? title : 'Dashboard'})}"></th:block>
+
+        <!-- Visualização das Secções/Tabelas (Renderiza o fragmento das páginas filhas) -->
+        <div class="content-view">
+            <th:block th:replace="${content}"></th:block>
+        </div>
+    </main>
+</div>
+
+<!-- Motor Controlador Central (UI e chamadas API de mapeamento) -->
+<script th:src="@{/static/ui.js}"></script>
+
+<!-- Injeção opcional de scripts específicos de páginas filhas, se declarados -->
+<th:block th:if="${scripts != null}">
+    <th:block th:replace="${scripts}"></th:block>
+</th:block>
+</body>
+</html>

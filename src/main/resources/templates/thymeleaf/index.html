@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasketHub - Administração Central</title>
+
+    <!-- Tipografia Premium 'Inter' e Ícones FontAwesome -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- O teu CSS Modernizado -->
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+<div class="app-container">
+
+    <!-- Painel Lateral de Navegação (Sidebar) -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-basketball"></i>
+            <span>BasketHub</span>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-link active" data-target="dashboard" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+            </button>
+            <button class="nav-link" data-target="jogadores" onclick="switchTab('jogadores')">
+                <i class="fa-solid fa-user"></i><span>Jogadores</span>
+            </button>
+            <button class="nav-link" data-target="equipas" onclick="switchTab('equipas')">
+                <i class="fa-solid fa-shield-halved"></i><span>Equipas</span>
+            </button>
+            <button class="nav-link" data-target="eventos" onclick="switchTab('eventos')">
+                <i class="fa-solid fa-calendar-days"></i><span>Eventos</span>
+            </button>
+            <button class="nav-link" data-target="jogos" onclick="switchTab('jogos')">
+                <i class="fa-solid fa-trophy"></i><span>Jogos</span>
+            </button>
+            <button class="nav-link" data-target="pavilhoes" onclick="switchTab('pavilhoes')">
+                <i class="fa-solid fa-building"></i><span>Pavilhões</span>
+            </button>
+            <button class="nav-link" data-target="organizadores" onclick="switchTab('organizadores')">
+                <i class="fa-solid fa-user-tie"></i><span>Organizadores</span>
+            </button>
+            <button class="nav-link" data-target="patrocinadores" onclick="switchTab('patrocinadores')">
+                <i class="fa-solid fa-handshake"></i><span>Patrocinadores</span>
+            </button>
+            <button class="nav-link" data-target="inscricoes" onclick="switchTab('inscricoes')">
+                <i class="fa-solid fa-file-signature"></i><span>Inscrições</span>
+            </button>
+            <button class="nav-link" data-target="classificacoes" onclick="switchTab('classificacoes')">
+                <i class="fa-solid fa-list-ol"></i><span>Classificações</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Área de Conteúdo Principal -->
+    <main class="main-content">
+        <!-- Barra Superior Alinhada -->
+        <header class="top-bar">
+            <div class="page-title-area">
+                <h1 id="current-view-title">Dashboard</h1>
+            </div>
+            <div class="user-profile">
+                <i class="fa-solid fa-circle-user"></i>
+                <span th:text="${user != null ? user.name : 'JeBron Lames'}">JeBron Lames</span>
+            </div>
+        </header>
+
+        <!-- Contentor Dinâmico onde o ui.js injeta as tabelas e os seletores textuais -->
+        <div class="content-view" id="view-container"></div>
+    </main>
+</div>
+
+<!-- Lógica de Controlo e Mapeamento de IDs para Nomes Reais -->
+<script src="/static/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html th:replace="~{layout :: layout('Equipas', ~{::section})}">
+<section>
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Gestão de Equipas</h2>
+            <button class="btn" onclick="openModal('add')">
+                <i class="fa-solid fa-plus"></i> Nova Equipa
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-hub" id="equipasTable">
+                <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Nome da Equipa</th>
+                    <th style="width: 120px;">Sigla</th>
+                    <th>Localidade</th>
+                    <th style="width: 100px; text-align: center;">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="equipaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center;">
+        <div class="modal" style="background: var(--bg-card); width: 100%; max-width: 500px; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
+
+            <div class="modal-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                <h3 id="modalTitle" style="font-size: 18px; font-weight: 700;">Nova Equipa</h3>
+                <button class="btn-icon" data-dismiss="modal" style="font-size: 18px; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body" style="padding: 24px;">
+                <form id="equipaForm" onsubmit="event.preventDefault();">
+                    <input type="hidden" id="equipaId">
+
+                    <div class="modal-form-group" style="margin-bottom: 16px;">
+                        <label>Nome da Equipa</label>
+                        <input type="text" id="nome" required maxlength="100" placeholder="Ex: Aveiro Basket">
+                    </div>
+
+                    <div class="flex-form-row">
+                        <div class="modal-form-group">
+                            <label>Sigla Oficial</label>
+                            <input type="text" id="sigla" required maxlength="10" style="text-transform: uppercase;" placeholder="Ex: ABC">
+                        </div>
+                        <div class="modal-form-group">
+                            <label>Localidade</label>
+                            <input type="text" id="localidade" required maxlength="100" placeholder="Ex: Aveiro">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer" style="padding: 16px 24px; background-color: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn" data-dismiss="modal" style="background-color: #e2e8f0; color: #334155;">Cancelar</button>
+                <button class="btn" onclick="saveEquipa()">Guardar Registo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Controlador customizado para gerir o overlay da modal nativamente com o teu layout
+        const modalElement = document.getElementById('equipaModal');
+        const modal = {
+            open: () => { modalElement.style.display = 'flex'; },
+            close: () => { modalElement.style.display = 'none'; }
+        };
+
+        // Ativar fecho automático nos botões com atributo 'data-dismiss'
+        document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+            btn.addEventListener('click', () => modal.close());
+        });
+
+        let currentMode = 'add';
+
+        async function loadEquipas() {
+            const tbody = document.querySelector('#equipasTable tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> A atualizar ecossistema...</td></tr>';
+            try {
+                const equipas = await apiCall('/equipas');
+                tbody.innerHTML = equipas.map(eq => `
+                    <tr>
+                        <td><code style="font-weight:600; color:var(--text-muted);">${eq.id}</code></td>
+                        <td><strong>${eq.nome}</strong></td>
+                        <td><span class="badge badge-primary" style="font-weight:700;">${eq.sigla}</span></td>
+                        <td><span style="color: var(--text-muted); font-size: 13px;"><i class="fa-solid fa-location-dot" style="margin-right:4px;"></i>${eq.localidade}</span></td>
+                        <td>
+                            <div class="actions-cell" style="justify-content: center;">
+                                <button class="btn-icon" onclick="openModal('edit', ${eq.id})" title="Editar"><i class="fa-solid fa-pen" style="color: var(--primary);"></i></button>
+                                <button class="btn-icon delete" onclick="deleteEquipa(${eq.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger); padding: 24px;"><i class="fa-solid fa-triangle-exclamation"></i> Falha ao carregar as equipas do servidor.</td></tr>';
+            }
+        }
+
+        async function openModal(mode, id = null) {
+            currentMode = mode;
+            document.getElementById('equipaForm').reset();
+            document.getElementById('modalTitle').innerText = mode === 'add' ? 'Nova Equipa' : 'Editar Parâmetros da Equipa';
+
+            if (mode === 'edit') {
+                try {
+                    const eq = await apiCall(`/equipas/${id}`);
+                    document.getElementById('equipaId').value = eq.id;
+                    document.getElementById('nome').value = eq.nome;
+                    document.getElementById('sigla').value = eq.sigla;
+                    document.getElementById('localidade').value = eq.localidade;
+                } catch (e) {
+                    alert('Impossível resgatar dados desta equipa.');
+                    return;
+                }
+            }
+            modal.open();
+        }
+
+        async function saveEquipa() {
+            const form = document.getElementById('equipaForm');
+            if(!form.checkValidity()) { form.reportValidity(); return; }
+
+            const data = {
+                nome: document.getElementById('nome').value,
+                sigla: document.getElementById('sigla').value.toUpperCase(),
+                localidade: document.getElementById('localidade').value
+            };
+
+            const id = document.getElementById('equipaId').value;
+            try {
+                if (currentMode === 'add') {
+                    await apiCall('/equipas', 'POST', data);
+                } else {
+                    await apiCall(`/equipas/${id}`, 'PUT', data);
+                }
+                modal.close();
+                loadEquipas();
+            } catch (e) {
+                alert('Erro ao processar o salvamento na base de dados.');
+            }
+        }
+
+        async function deleteEquipa(id) {
+            if (confirm('Tem a certeza absoluta que deseja remover esta equipa do ecossistema?')) {
+                try {
+                    await apiCall(`/equipas/${id}`, 'DELETE');
+                    loadEquipas();
+                } catch (e) {
+                    alert('Erro crítico ao remover a equipa.');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadEquipas);
+    </script>
+</section>
+</html>

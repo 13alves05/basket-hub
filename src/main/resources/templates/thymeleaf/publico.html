@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Central do Adepto - BasketHub</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --danger: #ef4444;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--text-main);
+            transform: translateX(-3px);
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 i {
+            color: var(--primary);
+        }
+
+        .section-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+        }
+
+        .section-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Seletor Dropdown Customizado */
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #fff;
+            color: var(--text-main);
+            outline: none;
+            transition: var(--transition);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        /* Tabela Desportiva Premium */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table-hub {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .table-hub th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-hub td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .table-hub tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-hub tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .text-center {
+            text-align: center !important;
+            color: var(--text-muted);
+            padding: 32px !important;
+            font-size: 14px;
+        }
+
+        /* Badge de Pontuação Ganhos */
+        .pts-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            background-color: var(--success-bg);
+            color: var(--success);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/hub" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Voltar ao Hub Central
+    </a>
+
+    <h1><i class="fa-solid fa-trophy"></i> Central de Resultados e Tabelas Oficiais</h1>
+
+    <div class="section-card">
+        <h3><i class="fa-solid fa-magnifying-glass-chart" style="color: var(--text-muted);"></i> Selecione o Torneio Desejado</h3>
+        <select id="torneioPublico" onchange="atualizarEcrãPublico()">
+            <option value="" disabled selected>-- Escolher Competição por Nome --</option>
+            <option th:each="e : ${eventos}"
+                    th:value="${e.id}"
+                    th:text="${e.nome}">
+            </option>
+        </select>
+    </div>
+
+    <div class="section-card" style="padding: 10px 0 0 0; overflow: hidden;">
+        <div style="padding: 16px 24px 8px 24px;">
+            <h3><i class="fa-solid fa-list-ol" style="color: var(--text-muted);"></i> Classificação de Grupo (Mata-Mata / Liga)</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-hub">
+                <thead>
+                <tr>
+                    <th>Clube / Equipa</th>
+                    <th style="width: 100px;">Jogos</th>
+                    <th style="width: 100px;">Vitórias</th>
+                    <th style="width: 100px;">Derrotas</th>
+                    <th style="width: 140px;">Pontos Ganhos</th>
+                </tr>
+                </thead>
+                <tbody id="tabelaClassificacao">
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <i class="fa-solid fa-circle-info" style="margin-right: 6px;"></i> Selecione uma competição acima para processar a tabela em tempo real...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function atualizarEcrãPublico() {
+        const evId = document.getElementById("torneioPublico").value;
+        const tbody = document.getElementById("tabelaClassificacao");
+
+        if(!evId) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center"><i class="fa-solid fa-circle-info" style="margin-right: 6px;"></i> Selecione uma competição acima para processar a tabela em tempo real...</td></tr>`;
+            return;
+        }
+
+        // Feedback de processamento com Spinner Fluido
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center"><i class="fa-solid fa-spinner fa-spin" style="color: var(--primary); margin-right: 8px;"></i> A processar dados oficiais da competição...</td></tr>`;
+
+        fetch(`/classificacoes/torneio/${evId}`)
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(linhas => {
+                tbody.innerHTML = "";
+
+                if(linhas.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center"><i class="fa-solid fa-folder-open" style="margin-right: 6px;"></i> Nenhum registo oficial computado para esta competição até ao momento.</td></tr>`;
+                    return;
+                }
+
+                linhas.forEach(l => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong style="color: var(--text-main); font-size: 15px;">${l.nomeEquipa}</strong></td>
+                            <td><span style="font-weight: 500;">${l.jogos}</span></td>
+                            <td><span style="font-weight: 500; color: var(--success);">${l.vitorias}</span></td>
+                            <td><span style="font-weight: 500; color: var(--danger);">${l.derrotas}</span></td>
+                            <td><span class="pts-badge"><i class="fa-solid fa-star" style="font-size: 10px; margin-right: 5px;"></i> ${l.pontos} Pts</span></td>
+                        </tr>`;
+                });
+            })
+            .catch(() => {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Não foi possível comunicar com o servidor de tabelas. Tente novamente.</td></tr>`;
+            });
+    }
+</script>
+</body>
+</html>
