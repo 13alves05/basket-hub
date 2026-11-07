@@ -218,7 +218,7 @@
                     <option value="" disabled selected>-- Escolha um Pavilhão Disponível... --</option>
                     <option th:each="p : ${pavilhoes}"
                             th:value="${p.id}"
-                            th:text="${p.nome} + ' — ' + ${p.cidade}">
+                            th:text="${p.nome} + ' - ' + ${p.cidade}">
                     </option>
                 </select>
             </div>
