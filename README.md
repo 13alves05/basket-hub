@@ -52,8 +52,8 @@ Os ficheiros de configuração do servidor e a integração com a base de dados 
 No Windows:
 
 ```powershell
-.gradlew.bat test
-.gradlew.bat run
+.\gradlew.bat test
+.\gradlew.bat run
 ```
 
 Em Linux ou macOS:
@@ -69,7 +69,19 @@ Para gerar o artefacto de build:
 ./gradlew build
 ```
 
-A configuração da aplicação é carregada através dos recursos do projeto. Antes de executar num ambiente diferente do desenvolvimento, confirma as definições de base de dados e servidor.
+A configuração do servidor (incluindo a porta `8080`) está em `src/main/resources/application.yaml`. A ligação à base de dados H2 está definida em `src/main/kotlin/DBUtils/DBUtils.kt` e utiliza o ficheiro local `./h2`. Antes de executar noutro ambiente, revê estas definições.
+
+## Limitações e segurança
+
+Este repositório corresponde a um projeto académico e não deve ser exposto como serviço público nem utilizado para gerir dados reais.
+
+- As rotas de criação, alteração e remoção não exigem autenticação nem verificam permissões de utilizador.
+- A configuração CORS utiliza atualmente `anyHost()`, permitindo pedidos de origens externas.
+- A ligação H2 está configurada diretamente no código, com o utilizador `root` e palavra-passe vazia. A base de dados é local e não está preparada para alojamento público.
+- Algumas rotas devolvem mensagens de exceção ao cliente. Essas respostas devem ser substituídas por mensagens controladas antes de uma utilização pública.
+- Existe um teste de servidor básico, mas não uma suite completa de testes de integração para os módulos e operações CRUD.
+
+Antes de qualquer publicação, seria necessário implementar autenticação e autorização nas operações de escrita, restringir CORS às origens necessárias, retirar a configuração da base de dados do código e validar os dados recebidos em todos os endpoints.
 
 ## Estado
 
