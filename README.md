@@ -1,38 +1,80 @@
-# basket-hub
+# Basket Hub
 
-This project was created using the [Ktor Project Generator](https://start.ktor.io).
+Projeto académico desenvolvido no âmbito do curso de Desenvolvimento de Software. A aplicação disponibiliza uma plataforma web para gestão de atividades e entidades relacionadas com basquetebol.
 
-Here are some useful links to get you started:
- * [Ktor Documentation](https://ktor.io/docs/home.html)
- * [Ktor GitHub page](https://github.com/ktorio/ktor)
- * [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). [Request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up).
+## Funcionalidades
 
+A estrutura do código está organizada por áreas funcionais, incluindo:
 
-## Features
-Here's a list of features included in this project:
+- Gestão de equipas e jogadores.
+- Gestão de jogos e inscrições.
+- Organização de eventos e respetivos intervenientes.
+- Gestão de pavilhões e patrocinadores.
+- Consulta de classificações e estatísticas.
 
-| Name | Description |
-|------|-------------|
-| [Thymeleaf](https://start.ktor.io/p/io.ktor/server-thymeleaf) | Serves HTML content, templated using Thymeleaf |
-| [Static Content](https://start.ktor.io/p/io.ktor/server-static-content) | Serves static files from defined locations |
-| [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
-| [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation) | Provides automatic content conversion according to Content-Type and Accept headers |
-| [Exposed](https://start.ktor.io/p/org.jetbrains/server-exposed) | Adds Exposed database to your application |
-| [CORS](https://start.ktor.io/p/io.ktor/server-cors) | Enables Cross-Origin Resource Sharing (CORS) |
+A aplicação utiliza páginas HTML renderizadas no servidor e disponibiliza funcionalidades de backend através de Kotlin e Ktor.
 
+## Tecnologias
 
-## Building & Running
-To build or run the project, use one of the following tasks:
+- **Linguagem:** Kotlin
+- **Servidor:** Ktor com Netty
+- **Apresentação:** Thymeleaf
+- **Persistência:** Exposed e R2DBC
+- **Base de dados:** H2
+- **Serialização:** kotlinx.serialization
+- **Comunicação HTTP:** Content Negotiation e CORS
+- **Build:** Gradle
+- **JVM:** Java 21
 
+## Estrutura do projeto
 
-| Task | Description |
-|------|-------------|
-| `./gradlew test`    | Run the tests     |
-| `./gradlew build`   | Build the project |
-| `./gradlew run`     | Run the server    |
+O código está organizado em pacotes por domínio funcional, facilitando a separação das responsabilidades:
 
-If the server starts successfully, you'll see the following output:
+- `Agendamento`
+- `Classificacao`
+- `Equipa`
+- `Estatisticas`
+- `Evento`
+- `Inscricao`
+- `Jogador`
+- `Jogo`
+- `Organizador`
+- `Patrocinador`
+- `Pavilhao`
+- `DBUtils`
+
+Os ficheiros de configuração do servidor e a integração com a base de dados encontram-se na estrutura principal de `src/main/kotlin`.
+
+## Executar localmente
+
+É necessário ter um JDK compatível com Java 21.
+
+No Windows:
+
+```powershell
+.gradlew.bat test
+.gradlew.bat run
 ```
-2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
-2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
+
+Em Linux ou macOS:
+
+```bash
+./gradlew test
+./gradlew run
 ```
+
+Para gerar o artefacto de build:
+
+```bash
+./gradlew build
+```
+
+A configuração da aplicação é carregada através dos recursos do projeto. Antes de executar num ambiente diferente do desenvolvimento, confirma as definições de base de dados e servidor.
+
+## Estado
+
+Repositório de um projeto académico. A documentação descreve a organização e as tecnologias identificadas no código; não representa uma certificação de que todas as funcionalidades foram testadas ou estão prontas para produção.
+
+## Repositório
+
+[github.com/13alves05/basket-hub](https://github.com/13alves05/basket-hub)
