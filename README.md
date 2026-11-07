@@ -2,6 +2,10 @@
 
 Projeto académico desenvolvido no âmbito do curso de Desenvolvimento de Software. A aplicação disponibiliza uma plataforma web para gestão de atividades e entidades relacionadas com basquetebol.
 
+## Nota sobre o repositório
+
+Esta é uma versão distinta do Basket Hub que está nesta conta académica. **Não é o repositório do trabalho de grupo apresentado no ano letivo anterior.** O projeto de grupo está no repositório [bmgoliveira-UA/basket-hub](https://github.com/bmgoliveira-UA/basket-hub), que é a referência correta para esse trabalho. Mantém-se esta versão separada para não misturar histórico, código ou autoria entre os dois repositórios.
+
 ## Funcionalidades
 
 A estrutura do código está organizada por áreas funcionais, incluindo:
