@@ -46,4 +46,7 @@ fun Application.module() {
     Estatisticas_Rotas()
     Agendamento_Rotas()
     Classificacoes_Rotas()
+
+    // 4. Responder com uma página 404 personalizada para rotas não registadas
+    configureNotFound()
 }

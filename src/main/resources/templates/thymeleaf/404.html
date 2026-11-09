@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-PT" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#0d0f14">
+    <title>Página não encontrada | BasketHub</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0d0f14;
+            --panel: #171b24;
+            --panel-border: rgba(255,255,255,.1);
+            --text: #f5f7fb;
+            --muted: #a9b0bd;
+            --accent: #f2b01e;
+        }
+        * { box-sizing: border-box; }
+        html { min-width: 320px; background: var(--bg); }
+        body {
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            padding: clamp(18px, 5vw, 60px);
+            display: grid;
+            place-items: center;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 82% 0%, rgba(242,176,30,.12), transparent 32rem),
+                var(--bg);
+            font: 16px/1.65 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        main {
+            position: relative;
+            isolation: isolate;
+            width: min(100%, 800px);
+            overflow: hidden;
+            padding: clamp(28px, 6vw, 58px);
+            border: 1px solid var(--panel-border);
+            border-radius: 18px;
+            background: linear-gradient(120deg, rgba(242,176,30,.08), transparent 48%), var(--panel);
+            box-shadow: 0 24px 60px rgba(0,0,0,.35);
+        }
+        main::after {
+            position: absolute;
+            z-index: -1;
+            right: -.04em;
+            bottom: -.2em;
+            color: rgba(242,176,30,.045);
+            content: "BASKET";
+            font-size: clamp(5rem, 20vw, 13rem);
+            font-weight: 900;
+            line-height: .85;
+            letter-spacing: -.1em;
+            pointer-events: none;
+        }
+        .brand, .eyebrow {
+            margin: 0;
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+        .code {
+            margin: 28px 0 16px;
+            color: var(--accent);
+            font-size: clamp(5rem, 19vw, 9rem);
+            font-weight: 900;
+            line-height: .8;
+            letter-spacing: -.1em;
+        }
+        h1 {
+            max-width: 15ch;
+            margin: 12px 0;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            line-height: 1.02;
+            letter-spacing: -.06em;
+        }
+        .message { max-width: 55ch; color: var(--muted); }
+        code {
+            color: var(--text);
+            overflow-wrap: anywhere;
+            background: rgba(255,255,255,.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        nav { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+        a {
+            display: inline-flex;
+            min-height: 46px;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 18px;
+            border: 1px solid var(--accent);
+            border-radius: 9px;
+            color: #111;
+            background: var(--accent);
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: transform .18s ease, background .18s ease;
+        }
+        a.secondary { color: var(--text); background: transparent; border-color: var(--panel-border); }
+        a:hover { transform: translateY(-2px); color: #111; background: #fff; border-color: #fff; }
+        a:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+        @media (max-width: 480px) { nav a { width: 100%; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+    </style>
+</head>
+<body>
+<main>
+    <p class="brand">BasketHub / Gestão de Basquetebol</p>
+    <p class="code" aria-hidden="true">404</p>
+    <p class="eyebrow">Rota não encontrada / Jogada inválida</p>
+    <h1>Esta jogada não faz parte do jogo.</h1>
+    <p class="message">
+        Não foi possível encontrar o endereço <code th:text="${path}">/rota</code>.
+        Verifica o endereço ou regressa ao Hub para continuares.
+    </p>
+    <nav aria-label="Opções de navegação">
+        <a href="/hub">Voltar ao Hub</a>
+        <a class="secondary" href="/">Página inicial</a>
+    </nav>
+</main>
+</body>
+</html>
