@@ -228,3 +228,16 @@ Validação CI no commit `2ed1e42`: testes Gradle e build passaram.
 - Recuperação de conta e verificação de email.
 
 A barreira `APP_ENV=production` mantém-se ativa. A existência de login e sessões não significa que as rotas da aplicação estejam protegidas.
+
+
+## Primitiva de autorização por âmbito (2026-11-11)
+
+Foi adicionada a classe `AuthorizationService`:
+- Administrador ativo tem acesso global.
+- Os restantes utilizadores têm de possuir o papel pedido e um âmbito explícito correspondente ao mesmo papel, tipo e identificador de recurso.
+- Um âmbito atribuído a um papel não concede permissões a outro papel da mesma conta.
+- Contas inativas são sempre recusadas.
+
+Testes automatizados cobrem equipa atribuída, equipa diferente, isolamento entre papéis e Administrador inativo. CI passou em testes e build no commit `a68372a` (run `43059768612`).
+
+**Limite importante:** esta classe ainda não está ligada às rotas de negócio. Não considerar a aplicação protegida por RBAC até os guards estarem aplicados a todas as rotas e os testes HTTP/IDOR passarem. A matriz por rota continua a precisar de validação funcional.
