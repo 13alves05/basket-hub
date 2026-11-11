@@ -1,6 +1,6 @@
 package com.est.Security
 
-import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.SchemaUtils
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
@@ -102,6 +102,30 @@ object SecuritySchema {
                 SystemSecurityState,
                 SecurityAuditLog
             )
+
+            val roleCatalog = listOf(
+                "ADMINISTRADOR" to "Acesso global à plataforma",
+                "ORGANIZADOR" to "Gestão dos eventos atribuídos",
+                "GESTOR_EQUIPA" to "Gestão das equipas atribuídas",
+                "JOGADOR" to "Acesso ao próprio perfil de jogador",
+                "PATROCINADOR" to "Gestão do próprio perfil e contratos",
+                "VISITANTE" to "Acesso a informação pública"
+            )
+
+            roleCatalog.forEach { (code, description) ->
+                val roleExists = Roles
+                    .selectAll()
+                    .where { Roles.code eq code }
+                    .limit(1)
+                    .singleOrNull() != null
+
+                if (!roleExists) {
+                    Roles.insert {
+                        it[Roles.code] = code
+                        it[Roles.description] = description
+                    }
+                }
+            }
         }
     }
 }
