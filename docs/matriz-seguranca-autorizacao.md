@@ -4,12 +4,12 @@
 
 ## Estado atual
 
-- Não existe autenticação nem autorização nas rotas HTTP analisadas.
-- A aplicação recusa o arranque quando `APP_ENV=production`, através de `ensureDeploymentEnvironmentIsSupported` em `src/main/kotlin/main.kt`.
-- A proteção de arranque é uma barreira temporária, não um controlo de acesso por rota.
-- Não remover essa barreira até existir autenticação, autorização, proteção CSRF quando aplicável e testes negativos de acesso.
-- Foi confirmada a possibilidade de uma conta acumular vários papéis; cada papel mantém o seu próprio âmbito de recursos.
-- O projeto contém um `ExposedUserService` de exemplo (nome e idade), mas não contém um sistema de contas/autenticação utilizável.
+- A branch `feature/admin-bootstrap-security` já contém contas, papéis múltiplos, bootstrap inicial, sessões Bearer, gestão administrativa de papéis/âmbitos e autorização aplicada a parte das rotas.
+- A proteção de arranque continua a recusar `APP_ENV=production`, através de `ensureDeploymentEnvironmentIsSupported` em `src/main/kotlin/main.kt`. Esta barreira permanece obrigatória.
+- A política atual é incremental: equipas, eventos, jogos e geração/avanço do chaveamento têm autorização específica por âmbito; outras operações continuam sob a política provisória de Administrador.
+- A lista de rotas abaixo é o inventário funcional de referência e regista a superfície original. Não deve ser interpretada como afirmação de que todas continuam sem proteção; consultar os aditamentos de implementação mais recentes no final deste documento.
+- A possibilidade de uma conta acumular vários papéis foi confirmada; cada papel mantém o seu próprio âmbito de recursos.
+- O `ExposedUserService` de exemplo (nome e idade) continua sem utilização como sistema de autenticação.
 
 ## Modelo de contas e papéis
 
@@ -30,7 +30,7 @@ Uma conta pode acumular qualquer combinação operacional necessária. As permis
 
 ## Inventário de rotas
 
-Todas as rotas abaixo estão atualmente sem autenticação/autorização no código auditado. A classificação "leitura" ou "escrita" descreve o efeito técnico, não define quem deve ter acesso.
+As tabelas seguintes preservam o inventário da superfície funcional original, antes da implementação incremental de segurança. A classificação "leitura" ou "escrita" descreve o efeito técnico, não define quem deve ter acesso. O estado de proteção atual é descrito nas secções de atualização mais abaixo.
 
 ### API — leitura
 
@@ -151,7 +151,7 @@ Conclusão:
 
 Foi selecionado o provisionamento por segredo temporário de ambiente (bootstrap de uso único), sem registo público. A especificação está em [Primeiro Administrador — bootstrap seguro](primeiro-administrador-bootstrap.md).
 
-Estado: especificação documentada; implementação de contas, armazenamento de credenciais, endpoint de bootstrap, sessões e autorização ainda pendente. A seleção desta abordagem não significa que o sistema de autenticação esteja concluído. Manter o bloqueio de `APP_ENV=production`.
+Estado atual: o bootstrap, o armazenamento de contas e credenciais, as sessões Bearer e a autorização por âmbito já foram implementados parcialmente na branch. O endpoint de bootstrap está limitado a `APP_ENV=development`. A implementação parcial não significa que a autenticação/autorização esteja concluída em todas as rotas. Manter o bloqueio de `APP_ENV=production`.
 
 ## Revisão técnica do código individual (2026-11-11)
 
