@@ -2,6 +2,7 @@ package com.est
 
 import com.est.DBUtils.DatabaseCreation
 import com.est.DBUtils.DBUtils
+import com.est.Security.AuthorizationService
 import com.est.Security.SessionService
 import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.Evento.*
@@ -16,8 +17,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.ThymeleafContent
 
 fun Application.FrontendRotas() {
+    val sessions = SessionService(DBUtils.database)
+    val authorization = AuthorizationService(DBUtils.database)
+
     routing {
-        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
+        enforceTemporaryAdministratorPolicy(sessions)
 
         // ==========================================
         // 1. MENU PRINCIPAL
@@ -108,11 +112,36 @@ fun Application.FrontendRotas() {
 
         post("/eventos/{id}/agendamento") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "ID inválido")
+                return@post
+            }
+
+            val token = call.request.headers[HttpHeaders.Authorization]
+                ?.takeIf { it.startsWith("Bearer ", ignoreCase = true) }
+                ?.substringAfter(' ')
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+            val account = sessions.authenticate(token)
+            if (account == null) {
+                call.respond(HttpStatusCode.Unauthorized, "Autenticação necessária")
+                return@post
+            }
+
+            if ("ADMINISTRADOR" !in account.roles &&
+                !authorization.canAccess(account.accountId, "ORGANIZADOR", "EVENTO", id.toString())
+            ) {
+                call.respond(HttpStatusCode.Forbidden, "Sem acesso ao evento deste agendamento")
+                return@post
+            }
+
+            try {
                 val resultado = DatabaseCreation.AgendamentoService.gerarOuAvancarChaveamento(id)
                 call.respond(HttpStatusCode.OK, resultado)
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "ID inválido")
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.NotFound, e.message ?: "Evento não encontrado")
+            } catch (e: IllegalStateException) {
+                call.respond(HttpStatusCode.Conflict, e.message ?: "Não foi possível avançar o chaveamento")
             }
         }
 
