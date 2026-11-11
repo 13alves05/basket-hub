@@ -262,3 +262,33 @@ Testes cobrem criação de conta sem papéis implícitos, email duplicado, atrib
 - O processo de entrega segura da palavra-passe inicial, alteração de palavra-passe e recuperação de conta ainda não está implementado.
 - A proteção concorrente do último Administrador deve ser revista com o mecanismo de isolamento/lock da base de dados antes de uso operacional.
 - A matriz por rota e a correspondência entre recursos de domínio e âmbitos ainda precisam de validação.
+
+
+## Política provisória aplicada às rotas de negócio (2026-11-11)
+
+Foi ligada a guarda `enforceTemporaryAdministratorPolicy` aos grupos de rotas existentes:
+- Frontend e formulários;
+- eventos;
+- equipas;
+- jogadores;
+- inscrições;
+- jogos;
+- patrocinadores;
+- organizadores;
+- pavilhões;
+- estatísticas;
+- agendamento;
+- classificações.
+
+Comportamento atual:
+- Leituras GET explicitamente allowlisted em `BusinessRouteSecurity.kt` permanecem públicas.
+- As restantes operações exigem sessão Bearer válida e papel `ADMINISTRADOR`.
+- Pedido sem sessão: `401 Unauthorized`.
+- Sessão válida sem papel Administrador: `403 Forbidden`.
+- As rotas de gestão de contas continuam a usar a sua própria verificação de Administrador.
+
+Esta política é deliberadamente conservadora e temporária. **Não implementa ainda permissões de Organizador, Gestor de Equipa, Jogador ou Patrocinador por âmbito.** O `AuthorizationService` ainda não está integrado nas operações de domínio, nem há filtragem das listagens por recurso atribuído.
+
+Foi acrescentado um teste HTTP de integração para validar os resultados 401/403/200 e a disponibilidade da leitura pública de evento. A validação CI deste novo teste está pendente.
+
+A barreira `APP_ENV=production` permanece ativa. Não remover até existir autorização específica por operação, testes HTTP/IDOR e revisão operacional.
