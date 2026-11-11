@@ -145,3 +145,10 @@ Conclusão:
 - Não copiar o serviço `ExposedUserService`, o parâmetro `perfil` ou a configuração CORS como substitutos de autenticação.
 - Próximo passo necessário: escolher um processo seguro para provisionar o primeiro Administrador. A alternativa recomendada é um segredo de bootstrap de uso único, fornecido apenas por variável de ambiente, que cria a primeira conta administrativa e fica inutilizável após sucesso. O registo público continua desativado.
 - Manter o bloqueio de arranque em produção até à implementação e validação integral da autenticação e autorização.
+
+
+## Decisão sobre o primeiro Administrador
+
+Foi selecionado o provisionamento por segredo temporário de ambiente (bootstrap de uso único), sem registo público. A especificação está em [Primeiro Administrador — bootstrap seguro](primeiro-administrador-bootstrap.md).
+
+Estado: especificação documentada; implementação de contas, armazenamento de credenciais, endpoint de bootstrap, sessões e autorização ainda pendente. A seleção desta abordagem não significa que o sistema de autenticação esteja concluído. Manter o bloqueio de `APP_ENV=production`.
