@@ -27,7 +27,7 @@ object PasswordHasher {
     }
 
     fun verify(password: String, encodedHash: String): Boolean {
-        if (!encodedHash.startsWith("$" + "argon2id$")) return false
+        if (!encodedHash.startsWith("\\$argon2id\\$")) return false
 
         val argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id)
         val passwordChars = password.toCharArray()
