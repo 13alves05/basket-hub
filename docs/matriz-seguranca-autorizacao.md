@@ -173,3 +173,24 @@ A inspeção detalhada da branch `feature/admin-bootstrap-security` confirmou:
 6. Só depois rever a barreira de produção; não a remover enquanto existir qualquer rota sem classificação e proteção.
 
 A implementação não deve avançar com armazenamento de sessão apenas em memória nem com um endpoint de bootstrap sem persistência atómica. A configuração de produção atual continua bloqueada.
+
+
+## Implementação inicial de identidade e bootstrap (2026-11-11)
+
+Implementação inicial adicionada à branch de trabalho:
+- Schema persistente para contas, papéis, associação conta-papel, âmbitos por recurso, sessões revogáveis, estado de segurança e auditoria.
+- Catálogo dos seis papéis documentados, criado de forma idempotente na inicialização.
+- Restrições de unicidade para email normalizado, token de sessão e associação de âmbito.
+- Hashing de palavras-passe Argon2id (3 iterações, 64 MiB, paralelismo 1), com validação mínima de 12 caracteres e testes unitários de hash/verificação.
+- Endpoint `POST /auth/bootstrap`, protegido por token Bearer de pelo menos 32 bytes e limitado intencionalmente a `APP_ENV=development`.
+- Criação do primeiro Administrador numa transação; a chave primária do estado de bootstrap funciona como barreira de concorrência; conta, papel e evento de auditoria são gravados na mesma transação.
+
+Validação CI no commit `2ed1e42`: testes Gradle e build passaram.
+
+### Limitações ainda abertas
+
+- O endpoint de bootstrap ainda não tem testes de integração para concorrência, rollback, repetição, token inválido, email duplicado e ausência de fugas em logs.
+- Ainda não existe login, logout, validação de sessão, revogação operacional ou recuperação de conta.
+- As rotas de negócio continuam sem autenticação/autorização.
+- A limitação de tentativas e a configuração HTTPS/proxy para futura utilização operacional ainda precisam de implementação e validação.
+- A barreira `APP_ENV=production` continua obrigatória. O endpoint de bootstrap não torna a aplicação pronta para produção.
