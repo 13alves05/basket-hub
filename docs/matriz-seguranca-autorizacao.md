@@ -241,3 +241,24 @@ Foi adicionada a classe `AuthorizationService`:
 Testes automatizados cobrem equipa atribuída, equipa diferente, isolamento entre papéis e Administrador inativo. CI passou em testes e build no commit `a68372a` (run `43059768612`).
 
 **Limite importante:** esta classe ainda não está ligada às rotas de negócio. Não considerar a aplicação protegida por RBAC até os guards estarem aplicados a todas as rotas e os testes HTTP/IDOR passarem. A matriz por rota continua a precisar de validação funcional.
+
+
+## Gestão administrativa de contas, papéis e âmbitos (2026-11-11)
+
+Foram adicionados serviços e rotas administrativas protegidas por sessão Bearer e papel `ADMINISTRADOR`:
+- `POST /admin/accounts`: criar conta ativa, com email normalizado e palavra-passe inicial; não atribui papéis por omissão.
+- `POST /admin/accounts/{accountId}/roles`: atribuir um dos papéis existentes.
+- `DELETE /admin/accounts/{accountId}/roles/{roleCode}`: remover um papel; remove também todos os âmbitos desse papel para impedir reativação futura.
+- `POST /admin/accounts/{accountId}/scopes`: atribuir âmbito para EVENTO, EQUIPA, JOGADOR ou PATROCINADOR.
+- `DELETE /admin/accounts/{accountId}/scopes`: revogar o âmbito correspondente.
+- A última conta Administrador ativa não pode perder o papel Administrador.
+- As alterações são auditadas com a identidade do Administrador que as executou.
+
+Testes cobrem criação de conta sem papéis implícitos, email duplicado, atribuição de papel/âmbito, remoção de papel e limpeza dos âmbitos antigos, ator sem privilégios e proteção do último Administrador. CI passou em testes Gradle e build no commit `2cb2257` (run `43061777311`).
+
+### Limitações
+
+- As rotas administrativas de gestão de contas estão protegidas; as restantes rotas de negócio ainda não estão ligadas ao `AuthorizationService`.
+- O processo de entrega segura da palavra-passe inicial, alteração de palavra-passe e recuperação de conta ainda não está implementado.
+- A proteção concorrente do último Administrador deve ser revista com o mecanismo de isolamento/lock da base de dados antes de uso operacional.
+- A matriz por rota e a correspondência entre recursos de domínio e âmbitos ainda precisam de validação.
