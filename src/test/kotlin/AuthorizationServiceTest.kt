@@ -139,4 +139,25 @@ class AuthorizationServiceTest {
             authorization.accessibleScopeIds(accountId, "GESTOR_EQUIPA", "EQUIPA")
         )
     }
+    @Test
+    fun inactiveAdministratorCannotPassGlobalRoleOrScopeChecks() = runBlocking {
+        val database = newDatabase()
+        SecuritySchema.create(database)
+        val accountId = UUID.randomUUID().toString()
+        createAccount(
+            database,
+            accountId,
+            roles = listOf("ADMINISTRADOR"),
+            isActive = false
+        )
+
+        val authorization = AuthorizationService(database)
+        assertFalse(authorization.hasGlobalRole(accountId, "ADMINISTRADOR"))
+        assertFalse(authorization.canAccess(accountId, "GESTOR_EQUIPA", "EQUIPA", "any-team"))
+        assertEquals(
+            emptySet(),
+            authorization.accessibleScopeIds(accountId, "GESTOR_EQUIPA", "EQUIPA")
+        )
+    }
+
 }
