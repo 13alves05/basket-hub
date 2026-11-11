@@ -136,3 +136,18 @@ Continuam pendentes a proteção de todas as rotas de negócio por autenticaçã
 Foi criada uma primitiva `AuthorizationService` que exige o papel solicitado e um âmbito correspondente para o mesmo papel/recurso; Administradores ativos têm acesso global e contas inativas são recusadas. Os testes de isolamento de papéis e recursos passaram no CI do commit `a68372a` (run `43059768612`).
 
 Esta primitiva ainda não está aplicada às rotas de negócio. A aplicação continua bloqueada em produção até a autorização por rota e os testes de acesso cruzado estarem concluídos.
+
+
+## Gestão de contas e papéis (2026-11-11)
+
+O Administrador autenticado pode agora:
+- Criar contas sem papel implícito em `POST /admin/accounts`.
+- Atribuir/remover papéis.
+- Atribuir/revogar âmbitos de evento, equipa, jogador e patrocinador.
+- Consultar o resultado das operações através das respostas HTTP.
+
+A remoção de um papel elimina os âmbitos desse papel; a última conta Administrador ativa fica protegida. As operações são auditadas.
+
+CI passou em testes Gradle e build no commit `2cb2257` (run `43061777311`).
+
+Ainda falta implementar a alteração e recuperação de palavra-passe, entrega segura das credenciais iniciais, autorização nas rotas de negócio e validação completa da matriz de permissões. Produção continua bloqueada.
