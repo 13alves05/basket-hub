@@ -19,6 +19,15 @@ class BusinessRouteSecurityTest {
     }
 
     @Test
+    fun onlyTheEventScopedBracketGenerationWriteBypassesTheTemporaryGuard() {
+        assertTrue(isDelegatedScopedWrite(HttpMethod.Post, "/eventos/12/agendamento"))
+        assertFalse(isDelegatedScopedWrite(HttpMethod.Get, "/eventos/12/agendamento"))
+        assertFalse(isDelegatedScopedWrite(HttpMethod.Post, "/eventos/agendamento"))
+        assertFalse(isDelegatedScopedWrite(HttpMethod.Post, "/eventos/12/agendamento/extra"))
+        assertFalse(isDelegatedScopedWrite(HttpMethod.Post, "/eventos/12"))
+    }
+
+    @Test
     fun mutationsAndPrivateResourcesAreNotPublic() {
         assertFalse(isPublicRead(HttpMethod.Post, "/eventos"))
         assertFalse(isPublicRead(HttpMethod.Put, "/eventos/12"))
