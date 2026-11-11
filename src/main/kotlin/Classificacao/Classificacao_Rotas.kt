@@ -1,5 +1,7 @@
 package com.est.Classificacao
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import com.est.DBUtils.DatabaseCreation
 import com.est.Jogo.JogoService
@@ -14,6 +16,7 @@ fun Application.Classificacoes_Rotas() {
     val classificacaoService = ClassificacaoService(JogoService)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         route("/classificacoes") {
 
             // GET /classificacao/geral - Agregado de todos os eventos competitivos

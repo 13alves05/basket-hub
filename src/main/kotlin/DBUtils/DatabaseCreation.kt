@@ -12,6 +12,7 @@ import com.est.Patrocinador.PatrocinadorService
 import com.est.Inscricao.InscricaoService
 import com.est.Jogo.JogoService
 import com.est.Estatisticas.EstatisticasService
+import com.est.Security.SecuritySchema
 
 object DatabaseCreation {
     private lateinit var database: R2dbcDatabase
@@ -41,6 +42,9 @@ object DatabaseCreation {
 
     suspend fun init() {
         database = DBUtils.database
+
+        // Identity and authorization tables are initialized before application routes.
+        SecuritySchema.create(database)
 
         // 1. Tabelas Independentes (Base)
         PavilhaoService = PavilhaoService(database)

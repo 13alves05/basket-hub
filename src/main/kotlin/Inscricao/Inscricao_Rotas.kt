@@ -1,5 +1,7 @@
 package com.est.Inscricao
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import io.ktor.server.application.Application
 import io.ktor.server.routing.delete
@@ -18,6 +20,7 @@ fun Application.Inscricao_Rotas() {
     val service = InscricaoService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
             route("/inscricoes") {
                 post {
                     val dados = call.receive<Inscricao>()

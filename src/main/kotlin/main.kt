@@ -2,6 +2,9 @@ package com.est
 
 import com.est.Jogo.Jogos_Rotas
 import com.est.DBUtils.DatabaseCreation
+import com.est.DBUtils.DBUtils
+import com.est.Security.configureAuthRoutes
+import com.est.Security.configureRoleManagementRoutes
 import com.est.Jogador.Jogadores_Rotas
 import com.est.Pavilhao.Pavilhoes_Rotas
 import com.est.Organizador.Organizadores_Rotas
@@ -16,13 +19,15 @@ import com.est.Inscricao.Inscricao_Rotas
 import kotlinx.coroutines.runBlocking
 
 /**
- * Esta versão ainda não tem autenticação/autorização nas rotas de gestão.
- * Falha de forma segura se alguém tentar iniciá-la como serviço de produção.
+ * A autorização por papel e âmbito já está aplicada a parte das rotas.
+ * As restantes continuam sob uma política provisória ou aguardam definição
+ * das relações de domínio. A aplicação não pode arrancar em produção até
+ * a cobertura de segurança estar concluída e validada.
  */
 internal fun ensureDeploymentEnvironmentIsSupported(environment: String?) {
     if (environment?.trim()?.equals("production", ignoreCase = true) == true) {
         throw IllegalStateException(
-            "Basket Hub não pode arrancar em produção: autenticação e autorização ainda não estão implementadas."
+            "Basket Hub não pode arrancar em produção: a cobertura de autenticação e autorização ainda não está concluída."
         )
     }
 }
@@ -45,6 +50,8 @@ fun Application.module() {
     }
 
     // 3. Registar as Rotas
+    configureAuthRoutes(DBUtils.database)
+    configureRoleManagementRoutes(DBUtils.database)
     configureRouting()
     FrontendRotas()
 

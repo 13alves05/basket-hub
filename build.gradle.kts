@@ -28,7 +28,17 @@ dependencies {
     implementation(libs.h2database.h2)
     implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
+    implementation(libs.argon2.jvm)
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
+}
+
+
+tasks.test {
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStackTraces = true
+    }
 }

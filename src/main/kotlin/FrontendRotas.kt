@@ -1,6 +1,11 @@
 package com.est
 
 import com.est.DBUtils.DatabaseCreation
+import com.est.DBUtils.DBUtils
+import com.est.Security.AuthorizationService
+import com.est.Security.SessionService
+import com.est.Security.eventBracketGenerationRoute
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.Evento.*
 import com.est.Inscricao.Inscricao
 import com.est.Patrocinador.Patrocinador
@@ -13,7 +18,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.ThymeleafContent
 
 fun Application.FrontendRotas() {
+    val sessions = SessionService(DBUtils.database)
+    val authorization = AuthorizationService(DBUtils.database)
+
     routing {
+        enforceTemporaryAdministratorPolicy(sessions)
 
         // ==========================================
         // 1. MENU PRINCIPAL
@@ -102,14 +111,8 @@ fun Application.FrontendRotas() {
             call.respond(classificacao)
         }
 
-        post("/eventos/{id}/agendamento") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val resultado = DatabaseCreation.AgendamentoService.gerarOuAvancarChaveamento(id)
-                call.respond(HttpStatusCode.OK, resultado)
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "ID inválido")
-            }
+        eventBracketGenerationRoute(sessions, authorization) { eventId ->
+            DatabaseCreation.AgendamentoService.gerarOuAvancarChaveamento(eventId)
         }
 
         // ==========================================

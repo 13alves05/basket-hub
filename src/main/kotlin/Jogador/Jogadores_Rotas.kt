@@ -1,5 +1,7 @@
 package com.est.Jogador
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -12,6 +14,7 @@ fun Application.Jogadores_Rotas() {
     val jogadorService = JogadorService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
 
         // adicionar jogador
         post("/jogadores") {

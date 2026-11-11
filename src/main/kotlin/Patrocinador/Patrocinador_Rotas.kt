@@ -1,5 +1,7 @@
 package com.est.Patrocinador
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import com.est.DBUtils.DatabaseCreation
 import io.ktor.http.HttpStatusCode
@@ -12,6 +14,7 @@ fun Application.Patrocinadores_Rotas() {
     val service = PatrocinadorService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         route("/patrocinadores") {
             post {
                 val dados = call.receive<Patrocinador>()
