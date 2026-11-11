@@ -6,7 +6,7 @@ import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
-import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.intercept
 
@@ -37,11 +37,11 @@ fun Route.enforceTemporaryAdministratorPolicy(sessionService: SessionService) {
         val account = sessionService.authenticate(token)
         when {
             account == null -> {
-                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Autenticação necessária."))
+                call.respondText("Autenticação necessária.", status = HttpStatusCode.Unauthorized)
                 finish()
             }
             "ADMINISTRADOR" !in account.roles -> {
-                call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Acesso reservado ao Administrador até à conclusão da autorização por âmbito."))
+                call.respondText("Acesso reservado ao Administrador até à conclusão da autorização por âmbito.", status = HttpStatusCode.Forbidden)
                 finish()
             }
             else -> proceed()
