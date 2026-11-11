@@ -1,9 +1,8 @@
 package com.est.Security
 
-import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.*
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.security.MessageDigest
 import java.util.Locale
@@ -75,27 +74,27 @@ class AdminBootstrapService(
                 }
 
                 Accounts.insert {
-                    it[id] = accountId
-                    it[emailNormalized] = normalizedEmail
+                    it[Accounts.id] = accountId
+                    it[Accounts.emailNormalized] = normalizedEmail
                     it[Accounts.passwordHash] = passwordHash
-                    it[isActive] = true
-                    it[createdAt] = now
-                    it[updatedAt] = now
+                    it[Accounts.isActive] = true
+                    it[Accounts.createdAt] = now
+                    it[Accounts.updatedAt] = now
                 }
 
                 AccountRoles.insert {
-                    it[accountId] = accountId
-                    it[roleCode] = ADMIN_ROLE
-                    it[assignedAt] = now
+                    it[AccountRoles.accountId] = accountId
+                    it[AccountRoles.roleCode] = ADMIN_ROLE
+                    it[AccountRoles.assignedAt] = now
                 }
 
                 SecurityAuditLog.insert {
-                    it[id] = UUID.randomUUID().toString()
-                    it[actorAccountId] = null
-                    it[eventType] = "FIRST_ADMIN_BOOTSTRAP_COMPLETED"
-                    it[targetType] = "ACCOUNT"
-                    it[targetId] = accountId
-                    it[occurredAt] = now
+                    it[SecurityAuditLog.id] = UUID.randomUUID().toString()
+                    it[SecurityAuditLog.actorAccountId] = null
+                    it[SecurityAuditLog.eventType] = "FIRST_ADMIN_BOOTSTRAP_COMPLETED"
+                    it[SecurityAuditLog.targetType] = "ACCOUNT"
+                    it[SecurityAuditLog.targetId] = accountId
+                    it[SecurityAuditLog.occurredAt] = now
                 }
             }
             BootstrapResult.CREATED
