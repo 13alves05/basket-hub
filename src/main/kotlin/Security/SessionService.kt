@@ -163,7 +163,7 @@ class SessionService(
         val now = System.currentTimeMillis()
 
         return suspendTransaction(database) {
-            val sessionId = AuthSessions
+            val session = AuthSessions
                 .selectAll()
                 .where {
                     (AuthSessions.tokenHash eq tokenHash) and
