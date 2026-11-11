@@ -80,12 +80,12 @@ A configuração do servidor (incluindo a porta `8080`) está em `src/main/resou
 Este repositório corresponde a um projeto académico e não deve ser exposto como serviço público nem utilizado para gerir dados reais.
 
 - As rotas de criação, alteração e remoção não exigem autenticação nem verificam permissões de utilizador.
-- A configuração CORS utiliza atualmente `anyHost()`, permitindo pedidos de origens externas.
+- O CORS não aceita origens externas por omissão. Se a interface for alojada noutro domínio, configura explicitamente a variável de ambiente `CORS_ALLOWED_HOSTS` com os hosts autorizados, separados por vírgulas.
 - A ligação H2 está configurada diretamente no código, com o utilizador `root` e palavra-passe vazia. A base de dados é local e não está preparada para alojamento público.
 - Algumas rotas devolvem mensagens de exceção ao cliente. Essas respostas devem ser substituídas por mensagens controladas antes de uma utilização pública.
 - Existe um teste de servidor básico, mas não uma suite completa de testes de integração para os módulos e operações CRUD.
 
-Antes de qualquer publicação, seria necessário implementar autenticação e autorização nas operações de escrita, restringir CORS às origens necessárias, retirar a configuração da base de dados do código e validar os dados recebidos em todos os endpoints.
+Antes de qualquer publicação, continua a ser necessário implementar autenticação e autorização nas operações de escrita, configurar apenas os hosts CORS necessários, retirar a configuração da base de dados do código e validar os dados recebidos em todos os endpoints.
 
 ## Estado
 
