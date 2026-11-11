@@ -4,7 +4,6 @@ import com.est.Jogo.Jogos_Rotas
 import com.est.DBUtils.DatabaseCreation
 import com.est.DBUtils.DBUtils
 import com.est.Security.configureAuthRoutes
-import com.est.Security.SecuritySchema
 import com.est.Jogador.Jogadores_Rotas
 import com.est.Pavilhao.Pavilhoes_Rotas
 import com.est.Organizador.Organizadores_Rotas
@@ -45,7 +44,6 @@ fun Application.module() {
     // 2. Inicializar a Base de Dados
     runBlocking {
         DatabaseCreation.init()
-        SecuritySchema.create(DBUtils.database)
     }
 
     // 3. Registar as Rotas
