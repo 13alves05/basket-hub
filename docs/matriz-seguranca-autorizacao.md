@@ -152,3 +152,24 @@ Conclusão:
 Foi selecionado o provisionamento por segredo temporário de ambiente (bootstrap de uso único), sem registo público. A especificação está em [Primeiro Administrador — bootstrap seguro](primeiro-administrador-bootstrap.md).
 
 Estado: especificação documentada; implementação de contas, armazenamento de credenciais, endpoint de bootstrap, sessões e autorização ainda pendente. A seleção desta abordagem não significa que o sistema de autenticação esteja concluído. Manter o bloqueio de `APP_ENV=production`.
+
+## Revisão técnica do código individual (2026-11-11)
+
+A inspeção detalhada da branch `feature/admin-bootstrap-security` confirmou:
+- O projeto usa Kotlin/JVM 21, Ktor e Exposed R2DBC 1.3.0.
+- O acesso à base de dados passa por `DBUtils.database`; o ambiente local usa H2 por omissão e produção exige `BASKET_HUB_DB_URL`, `BASKET_HUB_DB_USER` e `BASKET_HUB_DB_PASSWORD`.
+- `DatabaseCreation.init()` cria os schemas de domínio existentes, mas ainda não cria contas, papéis, credenciais ou sessões.
+- `ExposedUserService` é um CRUD de demonstração para nome/idade e não deve ser reaproveitado como autenticação.
+- As rotas estão distribuídas por módulos, pelo que a proteção terá de abranger cada grupo de rotas e não apenas um endpoint novo.
+- Foi removido o registo duplicado de `POST /eventos/{id}/agendamento` de `Agendamento_Rotas.kt`; a operação continua registada em `FrontendRotas.kt`. A rota `GET /eventos/{id}/chaveamento` mantém-se no módulo de agendamento.
+
+### Sequência de implementação
+
+1. Definir e testar o armazenamento de contas, papéis múltiplos, associação de âmbitos e estado de bootstrap na mesma base de dados R2DBC.
+2. Implementar hashing de palavras-passe Argon2id e bootstrap atómico, de uso único, com segredo de ambiente.
+3. Implementar login, logout, sessões revogáveis e proteção CSRF adequada ao mecanismo de sessão escolhido.
+4. Aplicar autorização por omissão a todas as rotas, com verificação do papel e do âmbito do recurso.
+5. Criar testes de bootstrap concorrente/repetido, credenciais inválidas, sessão expirada, CSRF, acesso sem papel, acesso a recurso alheio e combinação de papéis.
+6. Só depois rever a barreira de produção; não a remover enquanto existir qualquer rota sem classificação e proteção.
+
+A implementação não deve avançar com armazenamento de sessão apenas em memória nem com um endpoint de bootstrap sem persistência atómica. A configuração de produção atual continua bloqueada.
