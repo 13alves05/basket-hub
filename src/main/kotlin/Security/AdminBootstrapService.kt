@@ -65,7 +65,7 @@ class AdminBootstrapService(
 
                 val existingAdministrator = AccountRoles
                     .selectAll()
-                    .where { roleCode eq ADMIN_ROLE }
+                    .where { AccountRoles.roleCode eq ADMIN_ROLE }
                     .limit(1)
                     .singleOrNull()
 
@@ -107,7 +107,7 @@ class AdminBootstrapService(
             val alreadyCompleted = suspendTransaction(database) {
                 SystemSecurityState
                     .selectAll()
-                    .where { stateKey eq BOOTSTRAP_STATE_KEY }
+                    .where { SystemSecurityState.stateKey eq BOOTSTRAP_STATE_KEY }
                     .limit(1)
                     .singleOrNull() != null
             }
