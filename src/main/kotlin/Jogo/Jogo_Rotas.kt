@@ -29,12 +29,6 @@ fun Application.Jogos_Rotas() {
     val eventos = EventoService(DBUtils.database)
     val inscricoes = InscricaoService(DBUtils.database)
 
-    suspend fun ApplicationCall.canManageEvent(eventId: Int): Boolean {
-        val account = gameAccount(sessions) ?: return false
-        return authorization.canAccess(
-            account.accountId, ORGANIZER_ROLE, EVENT_SCOPE, eventId.toString()
-        )
-    }
 
     suspend fun validGameForEvent(game: Jogo): Boolean {
         val event = eventos.lerEventoPorId(game.eventoId) ?: return false
