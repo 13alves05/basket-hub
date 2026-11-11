@@ -23,7 +23,7 @@ fun Route.enforceTemporaryAdministratorPolicy(sessionService: SessionService) {
         val method = call.request.httpMethod
         val path = call.request.path()
 
-        if (isPublicRead(method, path)) {
+        if (isPublicRead(method, path) || isDelegatedScopedWrite(method, path)) {
             proceed()
             return@intercept
         }
@@ -48,6 +48,13 @@ fun Route.enforceTemporaryAdministratorPolicy(sessionService: SessionService) {
         }
     }
 }
+
+/**
+ * These writes are exempt from the temporary Administrator-only guard because
+ * their endpoint performs an explicit role-and-resource-scope authorization check.
+ */
+internal fun isDelegatedScopedWrite(method: HttpMethod, path: String): Boolean =
+    method == HttpMethod.Post && path.matches(Regex("^/eventos/\\\\d+/agendamento$"))
 
 internal fun isPublicRead(method: HttpMethod, path: String): Boolean {
     if (method != HttpMethod.Get) return false
