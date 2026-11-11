@@ -4,6 +4,7 @@ import com.est.DBUtils.DatabaseCreation
 import com.est.DBUtils.DBUtils
 import com.est.Security.AuthorizationService
 import com.est.Security.SessionService
+import com.est.Security.eventBracketGenerationRoute
 import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.Evento.*
 import com.est.Inscricao.Inscricao
@@ -110,39 +111,8 @@ fun Application.FrontendRotas() {
             call.respond(classificacao)
         }
 
-        post("/eventos/{id}/agendamento") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID inválido")
-                return@post
-            }
-
-            val token = call.request.headers[HttpHeaders.Authorization]
-                ?.takeIf { it.startsWith("Bearer ", ignoreCase = true) }
-                ?.substringAfter(' ')
-                ?.trim()
-                ?.takeIf { it.isNotEmpty() }
-            val account = sessions.authenticate(token)
-            if (account == null) {
-                call.respond(HttpStatusCode.Unauthorized, "Autenticação necessária")
-                return@post
-            }
-
-            if ("ADMINISTRADOR" !in account.roles &&
-                !authorization.canAccess(account.accountId, "ORGANIZADOR", "EVENTO", id.toString())
-            ) {
-                call.respond(HttpStatusCode.Forbidden, "Sem acesso ao evento deste agendamento")
-                return@post
-            }
-
-            try {
-                val resultado = DatabaseCreation.AgendamentoService.gerarOuAvancarChaveamento(id)
-                call.respond(HttpStatusCode.OK, resultado)
-            } catch (e: IllegalArgumentException) {
-                call.respond(HttpStatusCode.NotFound, e.message ?: "Evento não encontrado")
-            } catch (e: IllegalStateException) {
-                call.respond(HttpStatusCode.Conflict, e.message ?: "Não foi possível avançar o chaveamento")
-            }
+        eventBracketGenerationRoute(sessions, authorization) { eventId ->
+            DatabaseCreation.AgendamentoService.gerarOuAvancarChaveamento(eventId)
         }
 
         // ==========================================
