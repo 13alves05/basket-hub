@@ -170,20 +170,20 @@ class SessionService(
                         AuthSessions.revokedAt.isNull()
                 }
                 .limit(1)
-                .map { it[AuthSessions.id] }
+                .map { it[AuthSessions.id] to it[AuthSessions.accountId] }
                 .singleOrNull()
                 ?: return@suspendTransaction false
 
-            AuthSessions.update({ AuthSessions.id eq sessionId }) {
+            AuthSessions.update({ AuthSessions.id eq session.first }) {
                 it[AuthSessions.revokedAt] = now
             }
 
             SecurityAuditLog.insert {
                 it[SecurityAuditLog.id] = UUID.randomUUID().toString()
-                it[SecurityAuditLog.actorAccountId] = null
+                it[SecurityAuditLog.actorAccountId] = session.second
                 it[SecurityAuditLog.eventType] = "AUTH_SESSION_REVOKED"
                 it[SecurityAuditLog.targetType] = "SESSION"
-                it[SecurityAuditLog.targetId] = sessionId
+                it[SecurityAuditLog.targetId] = session.first
                 it[SecurityAuditLog.occurredAt] = now
             }
             true
