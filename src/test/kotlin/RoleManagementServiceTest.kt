@@ -72,6 +72,19 @@ class RoleManagementServiceTest {
         val authorization = AuthorizationService(database)
         assertTrue(authorization.canAccess(targetId, "GESTOR_EQUIPA", "EQUIPA", "equipa-10"))
         assertFalse(authorization.canAccess(targetId, "GESTOR_EQUIPA", "EQUIPA", "equipa-11"))
+
+        assertEquals(
+            RoleManagementResult.SUCCESS,
+            management.removeRole(adminId, targetId, "GESTOR_EQUIPA")
+        )
+        assertEquals(
+            RoleManagementResult.SUCCESS,
+            management.assignRole(adminId, targetId, "GESTOR_EQUIPA")
+        )
+        assertFalse(
+            authorization.canAccess(targetId, "GESTOR_EQUIPA", "EQUIPA", "equipa-10"),
+            "A remoção e nova atribuição de um papel não podem reativar âmbitos antigos."
+        )
     }
 
     @Test
