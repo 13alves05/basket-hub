@@ -30,23 +30,6 @@ A aplicação utiliza páginas HTML renderizadas no servidor e disponibiliza fun
 - **Build:** Gradle
 - **JVM:** Java 21
 
-## Estrutura do projeto
-
-O código está organizado em pacotes por domínio funcional, facilitando a separação das responsabilidades:
-
-- `Agendamento`
-- `Classificacao`
-- `Equipa`
-- `Estatisticas`
-- `Evento`
-- `Inscricao`
-- `Jogador`
-- `Jogo`
-- `Organizador`
-- `Patrocinador`
-- `Pavilhao`
-- `DBUtils`
-
 ## Executar localmente
 
 É necessário ter um JDK compatível com Java 21.
@@ -77,7 +60,7 @@ A aplicação usa H2 local por omissão em desenvolvimento. A configuração da 
 
 Em desenvolvimento, se não definires variáveis, a aplicação mantém a configuração H2 local existente (`./h2`, utilizador `root`, palavra-passe vazia).
 
-Em produção (`APP_ENV=production`), a aplicação recusa iniciar sem estas três variáveis:
+Em produção, a configuração da base de dados exige:
 
 - `BASKET_HUB_DB_URL`: URL R2DBC da base de dados H2.
 - `BASKET_HUB_DB_USER`: utilizador da base de dados.
@@ -87,19 +70,19 @@ Não coloques credenciais no repositório nem em ficheiros versionados. Guarda-a
 
 ## Limitações e segurança
 
-Este repositório corresponde a um projeto académico e não deve ser exposto como serviço público nem utilizado para gerir dados reais.
+**Esta versão não está pronta para produção e não deve ser exposta como serviço público nem utilizada para gerir dados reais.**
 
 - As rotas de criação, alteração e remoção não exigem autenticação nem verificam permissões de utilizador.
-- O CORS não aceita origens externas por omissão. Se a interface for alojada noutro domínio, configura explicitamente a variável de ambiente `CORS_ALLOWED_HOSTS` com os hosts autorizados, separados por vírgulas.
-- Em desenvolvimento, a ligação H2 continua a usar os valores locais predefinidos. Em produção, a aplicação exige configuração externa e credenciais não vazias.
+- A versão atual recusa intencionalmente arrancar quando `APP_ENV=production`. Esta proteção temporária evita publicar acidentalmente uma aplicação sem autenticação e autorização. Será removida apenas depois de as rotas privadas estarem protegidas e testadas.
+- O CORS não aceita origens externas por omissão. Se a interface for alojada noutro domínio, configura explicitamente `CORS_ALLOWED_HOSTS` com os hosts autorizados, separados por vírgulas.
 - Algumas rotas ainda devolvem mensagens de exceção ao cliente. Essas respostas devem ser substituídas por mensagens controladas antes de uma utilização pública.
-- Existe um teste de servidor básico, mas não uma suite completa de testes de integração para os módulos e operações CRUD.
+- Existe um teste de servidor básico e testes de proteção do arranque, mas não uma suite completa de testes de integração para os módulos e operações CRUD.
 
-A exigência de credenciais externas em produção reduz o risco de publicar acidentalmente a configuração local, mas **não substitui autenticação e autorização**. Antes de qualquer publicação, continua a ser necessário proteger todas as rotas privadas, validar os dados recebidos, controlar erros e executar testes de segurança.
+A exigência de credenciais externas e a proteção do arranque em produção reduzem riscos de configuração, mas **não substituem autenticação e autorização**. Antes de qualquer publicação, continua a ser necessário implementar contas e sessões, proteger todas as rotas privadas, validar os dados recebidos, controlar erros e executar testes de segurança.
 
 ## Estado
 
-Repositório de um projeto académico. A documentação descreve a organização e as tecnologias identificadas no código; não representa uma certificação de que todas as funcionalidades foram testadas ou estão prontas para produção.
+Repositório de um projeto académico em desenvolvimento. A documentação descreve a organização e as tecnologias identificadas no código; não representa uma certificação de que todas as funcionalidades foram testadas ou estão prontas para produção.
 
 ## Repositório
 
