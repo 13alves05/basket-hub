@@ -15,7 +15,7 @@ import io.ktor.server.routing.post
 fun Route.eventBracketGenerationRoute(
     sessions: SessionService,
     authorization: AuthorizationService,
-    generate: suspend (Int) -> Any
+    generate: suspend (Int) -> String
 ) {
     post("/eventos/{id}/agendamento") {
         val eventId = call.parameters["id"]?.toIntOrNull()
