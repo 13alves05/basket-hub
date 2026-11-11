@@ -194,3 +194,37 @@ Validação CI no commit `2ed1e42`: testes Gradle e build passaram.
 - As rotas de negócio continuam sem autenticação/autorização.
 - A limitação de tentativas e a configuração HTTPS/proxy para futura utilização operacional ainda precisam de implementação e validação.
 - A barreira `APP_ENV=production` continua obrigatória. O endpoint de bootstrap não torna a aplicação pronta para produção.
+
+
+## Estado atualizado da implementação (2026-11-11)
+
+### Implementado na branch `feature/admin-bootstrap-security`
+
+- Schema persistente de contas, catálogo de papéis, atribuições de papéis, âmbitos por recurso, sessões, estado de segurança e auditoria.
+- Catálogo inicial de seis papéis criado de forma idempotente.
+- Inicialização do schema de segurança integrada em `DatabaseCreation.init()`.
+- Bootstrap do primeiro Administrador com token Bearer de pelo menos 32 bytes, apenas em `APP_ENV=development`, com criação transacional e proteção contra repetição.
+- Hashing Argon2id das palavras-passe.
+- Login por email/palavra-passe.
+- Sessões Bearer opacas de 256 bits, com hash SHA-256 persistido, validade de 8 horas e revogação.
+- Consulta da identidade e papéis em `GET /auth/me`.
+- Logout em `POST /auth/logout`.
+- Eventos de auditoria para bootstrap, login bem-sucedido e revogação de sessão.
+
+### Testes e CI
+
+- Testes para bootstrap, token inválido/fraco, persistência do Administrador, hash da palavra-passe, atribuição do papel e auditoria.
+- Testes para login válido/inválido, sessão autenticada e revogação.
+- CI passou em testes Gradle e build no commit `4fd9969` (run `43058203577`).
+
+### Ainda não implementado — bloqueios de segurança
+
+- Middleware/guardas de autenticação aplicados às rotas de negócio.
+- Autorização por papel e por âmbito de evento/equipa/jogador/patrocinador.
+- Testes negativos de acesso cruzado entre recursos e testes de integração HTTP dos endpoints de autenticação.
+- Rate limiting/controlo de tentativas de login.
+- CSRF, caso se opte por sessões em cookies; a implementação atual usa Bearer tokens.
+- Revisão completa de HTTPS, proxy, CORS e gestão de segredos.
+- Recuperação de conta e verificação de email.
+
+A barreira `APP_ENV=production` mantém-se ativa. A existência de login e sessões não significa que as rotas da aplicação estejam protegidas.
