@@ -116,6 +116,7 @@ object SecuritySchema {
                     .selectAll()
                     .where { Roles.code eq code }
                     .limit(1)
+                    .map { it[Roles.code] }
                     .singleOrNull() != null
 
                 if (!roleExists) {
