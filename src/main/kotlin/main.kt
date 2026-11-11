@@ -19,13 +19,15 @@ import com.est.Inscricao.Inscricao_Rotas
 import kotlinx.coroutines.runBlocking
 
 /**
- * As rotas de negócio ainda não têm autorização por papel e âmbito.
- * Falha de forma segura se alguém tentar iniciá-la como serviço de produção.
+ * A autorização por papel e âmbito já está aplicada a parte das rotas.
+ * As restantes continuam sob uma política provisória ou aguardam definição
+ * das relações de domínio. A aplicação não pode arrancar em produção até
+ * a cobertura de segurança estar concluída e validada.
  */
 internal fun ensureDeploymentEnvironmentIsSupported(environment: String?) {
     if (environment?.trim()?.equals("production", ignoreCase = true) == true) {
         throw IllegalStateException(
-            "Basket Hub não pode arrancar em produção: autenticação e autorização ainda não estão implementadas."
+            "Basket Hub não pode arrancar em produção: a cobertura de autenticação e autorização ainda não está concluída."
         )
     }
 }
