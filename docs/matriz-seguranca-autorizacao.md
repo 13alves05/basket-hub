@@ -337,3 +337,58 @@ Não desbloquear estas rotas por inferência baseada em nome, email, query param
 - Jogador: ainda sob política provisória de Administrador; falta decidir e implementar a relação conta-jogador/equipa.
 - Patrocinador: ainda sob política provisória de Administrador; falta decidir e implementar a relação conta-patrocinador/contratos.
 - Produção continua bloqueada por `APP_ENV=production`. Não fazer merge nem deploy até terminar a autorização de todas as rotas e a revisão operacional.
+
+
+
+## Auditoria de inscrições, jogos e recursos associados (2026-11-11)
+
+A revisão das rotas e serviços de domínio identificou relações persistentes úteis para a próxima fase de autorização, mas não alterou permissões sem fechar a política de negócio.
+
+### Inscrições
+
+- A tabela `inscricoes` contém chaves estrangeiras reais para `equipa_id` e `evento_id`.
+- A inscrição pode, portanto, ser relacionada com o âmbito de uma equipa (`GESTOR_EQUIPA / EQUIPA`) e com o âmbito de um evento (`ORGANIZADOR / EVENTO`).
+- A listagem atual devolve todas as inscrições; a rota permanece sob a guarda provisória de Administrador.
+- Antes de abrir leituras ou escritas a Gestores/Organizadores, definir se basta controlar um dos lados da inscrição ou se determinadas operações exigem simultaneamente acesso à equipa e ao evento. Para criação, a política mais segura é validar ambos os âmbitos, ou manter a operação administrativa até decisão explícita.
+- Não aceitar `equipaId` ou `eventoId` do corpo como prova de autorização.
+
+### Jogos e chaveamento
+
+- A tabela `jogos` referencia `evento_id`, `equipa_casa_id`, `equipa_fora_id` e `pavilhao_id`.
+- Existe base técnica para verificar o âmbito do Organizador pelo evento e, quando a relação equipa/conta estiver aprovada, para verificar o âmbito do Gestor de Equipa.
+- As operações CRUD em `/jogos` continuam reservadas ao Administrador pela guarda provisória.
+- A leitura de `GET /eventos/{id}/chaveamento` está explicitamente na allowlist pública. Esta exposição deve ser confirmada como conteúdo desportivo público; se os resultados ou participantes de certos eventos forem privados, a allowlist precisa de uma regra de publicação/visibilidade por evento.
+- O serviço de agendamento gera jogos a partir das inscrições e do evento, pelo que a operação de gerar/avançar rondas deve validar o âmbito do mesmo evento antes de permitir acesso a Organizadores.
+
+### Estatísticas
+
+- Cada registo estatístico referencia um jogador e uma equipa, mas o modelo de jogador ainda não tem associação persistente a conta ou equipa.
+- A rota de leitura por jogador e a escrita de movimentos permanecem reservadas ao Administrador.
+- Não permitir que um utilizador escolha livremente `jogadorId` ou `equipaId` para ler ou escrever estatísticas sem uma associação validada.
+
+### Pavilhões e organizadores
+
+- Pavilhões são recursos globais e não têm atualmente associação a uma conta ou a um evento como âmbito próprio. CRUD permanece administrativo.
+- Eventos guardam `organizadorId`, mas este ID referencia um registo de domínio de Organizador, não uma conta autenticada. A autorização de evento usa a associação explícita `RoleScopes` com tipo `EVENTO`; não inferir identidade de conta a partir do `organizadorId`.
+- A gestão de registos de Organizador permanece administrativa até existir uma ligação formal entre conta e registo de Organizador.
+
+### Revisão da superfície pública
+
+A allowlist de `BusinessRouteSecurity.kt` permite apenas GETs exatos de páginas/conteúdo público e leituras de eventos, chaveamentos e classificações. Métodos de escrita não são allowlisted. As rotas GET de inscrições, jogos CRUD, estatísticas, pavilhões, jogadores e patrocinadores continuam protegidas pela política provisória, salvo os caminhos públicos expressamente listados.
+
+**Ação pendente:** validar com o responsável funcional se chaveamentos e classificações são sempre públicos ou se dependem do estado de publicação do evento. Até essa decisão, a regra atual é uma decisão técnica provisória, não uma política de privacidade confirmada.
+
+### CI e estado da branch
+
+- Run #88 (`43079080189`, commit `c5be2eb`): testes Gradle e build passaram.
+- Run #89 (`43079408319`, commit `9f020ca`): testes Gradle e build passaram.
+- PR #2 mantém-se como draft; não foi feito merge nem deploy.
+- O bloqueio de arranque em produção continua ativo.
+
+### Próxima sequência recomendada
+
+1. Adicionar testes HTTP reais às rotas de equipa e evento para comprovar isolamento entre dois âmbitos distintos, não apenas testar a primitiva de autorização.
+2. Implementar autorização por evento em agendamento/jogos, preservando as regras de publicação das leituras públicas.
+3. Decidir e testar a regra de autorização de inscrições (equipa, evento ou ambos) antes de alterar as rotas.
+4. Resolver as relações de conta-jogador, conta-patrocinador e conta-organizador antes de abrir os respetivos recursos.
+5. Manter CRUD de pavilhões e gestão global de entidades sob Administrador.
