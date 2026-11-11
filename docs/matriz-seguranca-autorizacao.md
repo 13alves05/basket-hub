@@ -1,6 +1,6 @@
 # Matriz de segurança e autorização
 
-> Estado auditado em 2026-11-11. Documento de análise do código atual; não representa uma política de permissões aprovada.
+> Estado auditado em 2026-11-11. Documento de análise do código atual; a decisão de permitir múltiplos papéis por conta foi confirmada. A matriz funcional de permissões continua a ser uma proposta inicial, não uma especificação integralmente validada.
 
 ## Estado atual
 
@@ -8,6 +8,25 @@
 - A aplicação recusa o arranque quando `APP_ENV=production`, através de `ensureDeploymentEnvironmentIsSupported` em `src/main/kotlin/main.kt`.
 - A proteção de arranque é uma barreira temporária, não um controlo de acesso por rota.
 - Não remover essa barreira até existir autenticação, autorização, proteção CSRF quando aplicável e testes negativos de acesso.
+- Foi confirmada a possibilidade de uma conta acumular vários papéis; cada papel mantém o seu próprio âmbito de recursos.
+- O projeto contém um `ExposedUserService` de exemplo (nome e idade), mas não contém um sistema de contas/autenticação utilizável.
+
+## Modelo de contas e papéis
+
+A decisão e a proposta técnica estão documentadas em [Modelo de contas e papéis](modelo-contas-papeis.md).
+
+| Papel | Âmbito proposto | Permissões resumidas |
+|---|---|---|
+| Administrador | Plataforma | Gerir contas, papéis e todas as entidades; ações auditadas |
+| Organizador | Eventos atribuídos | Gerir eventos e operações associadas |
+| Gestor de Equipa | Equipas atribuídas | Gerir a própria equipa, jogadores e inscrições |
+| Jogador | Perfil associado | Consultar dados próprios, jogos, inscrições e estatísticas |
+| Patrocinador | Perfil/contratos próprios | Gerir perfil e propostas/contratos próprios |
+| Visitante | Informação pública | Consultar conteúdo publicado como público |
+
+Uma conta pode acumular qualquer combinação operacional necessária. As permissões são combinadas, mas cada operação verifica sempre o âmbito específico do recurso. Apenas Administrador pode atribuir ou remover papéis. Visitante não necessita de conta.
+
+**Ainda por decidir antes da implementação de autenticação:** processo seguro de criação do primeiro Administrador, política de registo de contas, recuperação de conta/verificação de email e campos de perfil editáveis. Não criar registo público nem uma conta administrativa por defeito.
 
 ## Inventário de rotas
 
@@ -67,36 +86,25 @@ Todas as rotas abaixo estão atualmente sem autenticação/autorização no cód
 
 Outras rotas técnicas encontradas: `/test`, `/json/kotlinx-serialization` e recursos estáticos em `/static`. Devem ser avaliadas separadamente antes de uma publicação.
 
-## Decisões necessárias antes de implementar permissões
-
-Não foram atribuídos papéis nem direitos neste documento. É necessário decidir, com base no funcionamento pretendido, pelo menos:
-
-1. Quem administra a plataforma e pode gerir todas as entidades.
-2. Quem cria/edita eventos e respetivos jogos, inscrições e pavilhões.
-3. Se gestores de equipa podem gerir apenas a própria equipa e os seus jogadores/inscrições.
-4. Se jogadores têm conta e podem consultar apenas os próprios dados.
-5. Se patrocinadores podem submeter propostas/contratos ou apenas consultar informação.
-6. Que dados e páginas são públicos sem sessão.
-
-Para cada decisão, especificar também o âmbito (global ou por evento/equipa), operações permitidas e comportamento quando o recurso não pertence ao utilizador.
-
-## Requisitos técnicos para a implementação seguinte
+## Requisitos técnicos para a implementação
 
 - Aplicar autenticação e autorização no servidor; esconder botões na interface não é proteção.
 - Usar negação por omissão e verificar a autorização em cada operação e recurso.
 - Impedir IDOR: validar que o utilizador autenticado tem acesso ao evento/equipa/jogador indicado no URL ou corpo.
+- Suportar vários papéis por conta com associações de âmbito (evento, equipa, jogador ou patrocinador).
 - Se a sessão usar cookies, proteger operações de escrita contra CSRF e configurar cookies `HttpOnly`, `Secure` e `SameSite` adequadamente.
 - Validar entradas e limitar campos/valores; não confiar em IDs enviados pelo cliente.
 - Não devolver exceções internas nem dados pessoais desnecessários.
-- Criar testes para não autenticado, autenticado sem permissão, acesso ao próprio recurso, acesso a recurso alheio e operações permitidas.
+- Criar testes para não autenticado, autenticado sem permissão, acesso ao próprio recurso, acesso a recurso alheio, papéis combinados e operações permitidas.
 - Manter `APP_ENV=production` bloqueado até todos os critérios anteriores estarem implementados e validados.
 
 ## Critério para desbloquear produção
 
 Só considerar remover a barreira de arranque depois de:
-- matriz de papéis e permissões aprovada;
+- processo de provisionamento inicial de Administrador definido e seguro;
+- matriz de papéis e permissões validada;
 - todas as rotas classificadas e protegidas;
-- testes automatizados positivos e negativos por grupo de rotas;
+- testes automatizados positivos e negativos por grupo de rotas e por âmbito;
 - proteção CSRF validada se forem usadas sessões por cookie;
 - revisão de erros, CORS, segredos e configuração de produção concluída.
 
