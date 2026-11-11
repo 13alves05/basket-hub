@@ -4,6 +4,7 @@ import com.est.Security.AuthorizationService
 import com.est.Security.SessionService
 import com.est.DBUtils.DBUtils
 import com.est.Evento.EventoService
+import com.est.Evento.Torneio
 import com.est.Inscricao.InscricaoService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -33,12 +34,14 @@ fun Application.Jogos_Rotas() {
     suspend fun validGameForEvent(game: Jogo): Boolean {
         val event = eventos.lerEventoPorId(game.eventoId) ?: return false
         if (game.pavilhaoId != event.pavilhaoId) return false
-        val registeredTeams = inscricoes.lerInscricoes()
-            .filter { it.eventoId == game.eventoId }
-            .map { it.equipaId }
-            .toSet()
-        if (game.equipaCasaId !in registeredTeams) return false
-        if (game.equipaForaId != null && game.equipaForaId !in registeredTeams) return false
+        if (event is Torneio) {
+            val registeredTeams = inscricoes.lerInscricoes()
+                .filter { it.eventoId == game.eventoId }
+                .map { it.equipaId }
+                .toSet()
+            if (game.equipaCasaId !in registeredTeams) return false
+            if (game.equipaForaId != null && game.equipaForaId !in registeredTeams) return false
+        }
         if (game.equipaForaId != null && game.equipaForaId == game.equipaCasaId) return false
         return true
     }
