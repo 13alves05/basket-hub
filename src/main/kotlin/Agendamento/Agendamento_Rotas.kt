@@ -1,5 +1,7 @@
 package com.est.Agendamento
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import com.est.DBUtils.DatabaseCreation
 import com.est.Evento.EventoService
@@ -23,6 +25,7 @@ fun Application.Agendamento_Rotas() {
     )
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         // Consulta todos os jogos (todas as rondas) já gerados para um evento
         get("/eventos/{id}/chaveamento") {
             try {
