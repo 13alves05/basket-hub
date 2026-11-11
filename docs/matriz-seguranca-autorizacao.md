@@ -432,3 +432,15 @@ A matriz de inventário acima descreve a superfície funcional original. O estad
 4. Manter pavilhões, gestão de organizadores e restantes entidades globais sob Administrador até haver uma necessidade funcional e um modelo de âmbito comprovados.
 
 A aplicação continua impedida de arrancar com `APP_ENV=production`. A implementação incremental de permissões não equivale a validação integral de todas as rotas nem autoriza remover a barreira.
+
+
+### Testes HTTP de geração/avanço do chaveamento
+
+A rota `POST /eventos/{id}/agendamento` foi extraída para `eventBracketGenerationRoute`, mantendo o mesmo handler em produção e permitindo testes HTTP isolados com uma base H2. `EventBracketGenerationRouteIntegrationTest` verifica:
+
+- Sem sessão: 401 e o callback de geração não é executado.
+- Organizador com âmbito apenas no evento 21: acesso ao evento 21 e 403 no evento 22.
+- Administrador: acesso global, incluindo o evento 22.
+- ID inválido: 400; evento inexistente: 404; estado de torneio incompatível: 409.
+
+Estes testes cobrem a fronteira HTTP e a autorização real contra a base de dados de teste. A lógica interna do serviço de geração continua coberta separadamente pelos testes do domínio; ainda falta um teste de ponta a ponta com tabelas de eventos, inscrições, equipas e jogos.
