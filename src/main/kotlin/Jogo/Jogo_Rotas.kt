@@ -1,5 +1,7 @@
 package com.est.Jogo
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import com.est.Jogo.Jogo
 
@@ -16,6 +18,7 @@ fun Application.Jogos_Rotas() {
     val service = JogoService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         route("/jogos") {
             post {
                 try {
