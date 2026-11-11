@@ -1,5 +1,7 @@
 package com.est.Pavilhao
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -11,6 +13,7 @@ fun Application.Pavilhoes_Rotas() {
     val PavilhaoService = PavilhaoService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         route("/pavilhoes") {
             post {
                 try {
