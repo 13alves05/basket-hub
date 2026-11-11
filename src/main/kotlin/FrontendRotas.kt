@@ -1,6 +1,9 @@
 package com.est
 
 import com.est.DBUtils.DatabaseCreation
+import com.est.DBUtils.DBUtils
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.Evento.*
 import com.est.Inscricao.Inscricao
 import com.est.Patrocinador.Patrocinador
@@ -14,6 +17,7 @@ import io.ktor.server.thymeleaf.ThymeleafContent
 
 fun Application.FrontendRotas() {
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
 
         // ==========================================
         // 1. MENU PRINCIPAL
