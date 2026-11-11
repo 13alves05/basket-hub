@@ -47,8 +47,6 @@ O código está organizado em pacotes por domínio funcional, facilitando a sepa
 - `Pavilhao`
 - `DBUtils`
 
-Os ficheiros de configuração do servidor e a integração com a base de dados encontram-se na estrutura principal de `src/main/kotlin`.
-
 ## Executar localmente
 
 É necessário ter um JDK compatível com Java 21.
@@ -73,7 +71,19 @@ Para gerar o artefacto de build:
 ./gradlew build
 ```
 
-A configuração do servidor (incluindo a porta `8080`) está em `src/main/resources/application.yaml`. A ligação à base de dados H2 está definida em `src/main/kotlin/DBUtils/DBUtils.kt` e utiliza o ficheiro local `./h2`. Antes de executar noutro ambiente, revê estas definições.
+A aplicação usa H2 local por omissão em desenvolvimento. A configuração da ligação está em `src/main/kotlin/DBUtils/DBUtils.kt`.
+
+## Configuração da base de dados
+
+Em desenvolvimento, se não definires variáveis, a aplicação mantém a configuração H2 local existente (`./h2`, utilizador `root`, palavra-passe vazia).
+
+Em produção (`APP_ENV=production`), a aplicação recusa iniciar sem estas três variáveis:
+
+- `BASKET_HUB_DB_URL`: URL R2DBC da base de dados H2.
+- `BASKET_HUB_DB_USER`: utilizador da base de dados.
+- `BASKET_HUB_DB_PASSWORD`: palavra-passe não vazia.
+
+Não coloques credenciais no repositório nem em ficheiros versionados. Guarda-as no gestor de segredos do ambiente de alojamento. O projeto inclui atualmente o driver H2; não assumes compatibilidade com PostgreSQL ou outro motor sem adicionar e testar o respetivo driver.
 
 ## Limitações e segurança
 
@@ -81,11 +91,11 @@ Este repositório corresponde a um projeto académico e não deve ser exposto co
 
 - As rotas de criação, alteração e remoção não exigem autenticação nem verificam permissões de utilizador.
 - O CORS não aceita origens externas por omissão. Se a interface for alojada noutro domínio, configura explicitamente a variável de ambiente `CORS_ALLOWED_HOSTS` com os hosts autorizados, separados por vírgulas.
-- A ligação H2 está configurada diretamente no código, com o utilizador `root` e palavra-passe vazia. A base de dados é local e não está preparada para alojamento público.
-- Algumas rotas devolvem mensagens de exceção ao cliente. Essas respostas devem ser substituídas por mensagens controladas antes de uma utilização pública.
+- Em desenvolvimento, a ligação H2 continua a usar os valores locais predefinidos. Em produção, a aplicação exige configuração externa e credenciais não vazias.
+- Algumas rotas ainda devolvem mensagens de exceção ao cliente. Essas respostas devem ser substituídas por mensagens controladas antes de uma utilização pública.
 - Existe um teste de servidor básico, mas não uma suite completa de testes de integração para os módulos e operações CRUD.
 
-Antes de qualquer publicação, continua a ser necessário implementar autenticação e autorização nas operações de escrita, configurar apenas os hosts CORS necessários, retirar a configuração da base de dados do código e validar os dados recebidos em todos os endpoints.
+A exigência de credenciais externas em produção reduz o risco de publicar acidentalmente a configuração local, mas **não substitui autenticação e autorização**. Antes de qualquer publicação, continua a ser necessário proteger todas as rotas privadas, validar os dados recebidos, controlar erros e executar testes de segurança.
 
 ## Estado
 
