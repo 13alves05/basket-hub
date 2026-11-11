@@ -23,22 +23,6 @@ fun Application.Agendamento_Rotas() {
     )
 
     routing {
-        // Gera a 1ª ronda do mata-mata de um Torneio, ou avança para a ronda
-        // seguinte se a ronda atual já estiver toda decidida.
-        post("/eventos/{id}/agendamento") {
-            try {
-                val eventoId = call.parameters["id"]?.toIntOrNull()
-                if (eventoId == null) {
-                    call.respond(HttpStatusCode.BadRequest, "ID de evento inválido")
-                    return@post
-                }
-                val resultado = service.gerarOuAvancarChaveamento(eventoId)
-                call.respond(HttpStatusCode.OK, resultado)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, e.message ?: "Erro ao gerar agendamento")
-            }
-        }
-
         // Consulta todos os jogos (todas as rondas) já gerados para um evento
         get("/eventos/{id}/chaveamento") {
             try {
