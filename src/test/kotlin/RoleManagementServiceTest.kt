@@ -107,4 +107,31 @@ class RoleManagementServiceTest {
             management.removeRole(adminId, adminId, "ADMINISTRADOR")
         )
     }
+    @Test
+    fun administratorCanCreateAnAccountWithoutImplicitRoles() = runBlocking {
+        val database = newDatabase()
+        SecuritySchema.create(database)
+        val adminId = createAdministrator(database)
+        val management = RoleManagementService(database)
+
+        val (result, accountId) = management.createAccount(
+            adminId,
+            "  New.User@Example.com ",
+            "Initial-BasketHub-2026"
+        )
+
+        assertEquals(RoleManagementResult.SUCCESS, result)
+        assertTrue(accountId != null)
+        val login = SessionService(database).login("new.user@example.com", "Initial-BasketHub-2026")
+        assertEquals(LoginResult.AUTHENTICATED, login.first)
+        assertTrue(login.second!!.account.roles.isEmpty())
+
+        val duplicate = management.createAccount(
+            adminId,
+            "new.user@example.com",
+            "Another-Initial-Password"
+        )
+        assertEquals(RoleManagementResult.EMAIL_ALREADY_EXISTS, duplicate.first)
+    }
+
 }
