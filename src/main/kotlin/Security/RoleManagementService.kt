@@ -13,6 +13,7 @@ enum class RoleManagementResult {
     FORBIDDEN,
     NOT_FOUND,
     INVALID_ROLE,
+    INVALID_SCOPE,
     ROLE_REQUIRED,
     ALREADY_ASSIGNED,
     NOT_ASSIGNED,
@@ -127,7 +128,7 @@ class RoleManagementService(private val database: R2dbcDatabase) {
             return@suspendTransaction RoleManagementResult.FORBIDDEN
         }
         if (scopeType !in supportedScopeTypes || scopeId.isBlank() || scopeId.length > 100) {
-            return@suspendTransaction RoleManagementResult.INVALID_ROLE
+            return@suspendTransaction RoleManagementResult.INVALID_SCOPE
         }
 
         val roleAssignmentExists = AccountRoles
@@ -201,8 +202,6 @@ class RoleManagementService(private val database: R2dbcDatabase) {
         audit(actorAccountId, "ROLE_SCOPE_REVOKED", "ROLE_SCOPE", "$targetAccountId:$roleCode:$scopeType:$scopeId", now)
         RoleManagementResult.SUCCESS
     }
-
-    private suspend fun org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction.isUnusedMarker() = Unit
 
     private suspend fun isActiveAdministrator(accountId: String): Boolean {
         val active = Accounts
