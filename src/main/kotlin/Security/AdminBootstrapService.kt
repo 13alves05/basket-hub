@@ -67,6 +67,7 @@ class AdminBootstrapService(
                     .selectAll()
                     .where { AccountRoles.roleCode eq ADMIN_ROLE }
                     .limit(1)
+                    .map { it[AccountRoles.roleCode] }
                     .singleOrNull()
 
                 if (existingAdministrator != null) {
@@ -109,6 +110,7 @@ class AdminBootstrapService(
                     .selectAll()
                     .where { SystemSecurityState.stateKey eq BOOTSTRAP_STATE_KEY }
                     .limit(1)
+                    .map { it[SystemSecurityState.stateKey] }
                     .singleOrNull() != null
             }
             if (alreadyCompleted) BootstrapResult.ALREADY_COMPLETED else throw BootstrapStorageException()
