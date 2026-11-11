@@ -66,7 +66,7 @@ fun Application.Equipas_Rotas() {
                 call.respond(HttpStatusCode.Forbidden, "Acesso reservado ao Gestor de Equipa")
                 return@get
             }
-            val teams = equipaService.lerEquipas().filter { it.id?.toString() in scopeIds }
+            val teams = equipaService.lerEquipas().filter { it.id?.toString()?.let(scopeIds::contains) == true }
             call.respond(HttpStatusCode.OK, teams)
         }
 
