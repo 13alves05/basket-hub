@@ -82,7 +82,7 @@ Todas as rotas abaixo estão atualmente sem autenticação/autorização no cód
 | GET | `/patrocinadores` | Página e, conforme Accept, listagem JSON |
 | GET | `/publico` | Página pública |
 | POST | `/patrocinadores/financiar` | Cria contrato de patrocínio via formulário |
-| POST | `/eventos/{id}/agendamento` | Também registada na API de agendamento; confirmar/remover o registo duplicado |
+| POST | `/eventos/{id}/agendamento` | Gera/avança o chaveamento; implementada em `FrontendRotas.kt` e protegida por âmbito de evento |
 
 Outras rotas técnicas encontradas: `/test`, `/json/kotlinx-serialization` e recursos estáticos em `/static`. Devem ser avaliadas separadamente antes de uma publicação.
 
@@ -410,3 +410,25 @@ A leitura pública do chaveamento permanece na allowlist GET existente. A opera�
 A rota devolve 401 sem sessão, 403 sem papel/âmbito, 404 se o evento não existir e 409 quando o torneio não permite gerar/avançar a ronda no estado atual.
 
 **Limitação de validação:** a alteração tem testes unitários para garantir que apenas o POST exato é delegado ao handler, mas ainda precisa de testes HTTP/IDOR com dois Organizadores e dois eventos. Os testes devem comprovar geração permitida no evento atribuído, negação no evento alheio, negação sem sessão e acesso global do Administrador. Os testes HTTP/IDOR de jogos também continuam pendentes.
+
+
+## Atualização da auditoria de rotas restantes (2026-11-11)
+
+A matriz de inventário acima descreve a superfície funcional original. O estado de proteção foi entretanto alterado nas rotas indicadas nos aditamentos seguintes. Nesta revisão foram confirmados os pontos abaixo:
+
+- **Agendamento:** existe um POST real `/eventos/{id}/agendamento` em `FrontendRotas.kt`; `Agendamento_Rotas.kt` contém apenas GET `/eventos/{id}/chaveamento`. Não são rotas duplicadas, porque têm métodos HTTP diferentes. O POST passou a exigir sessão e papel/âmbito `ORGANIZADOR / EVENTO / {id}`, ou Administrador global.
+- **Inscrições:** cada inscrição tem referências explícitas a `equipaId` e `eventoId`. Isso permite validar ambos os âmbitos tecnicamente, mas não decide se criar/editar/remover uma inscrição pertence ao Gestor de Equipa, ao Organizador, ou exige aprovação de ambos. As rotas permanecem temporariamente reservadas ao Administrador. Não confiar nos IDs do corpo sem validar a relação entre equipa e evento.
+- **Estatísticas:** os registos associam jogador e equipa, mas a identidade autenticada ainda não está ligada ao registo de jogador. As rotas permanecem temporariamente reservadas ao Administrador; não abrir leitura individual até existir associação conta-jogador e política de acesso ao histórico.
+- **Pavilhões:** são entidades globais sem âmbito de conta/evento próprio. CRUD permanece sob Administrador. A rota GET por ID também permanece protegida pela política provisória, tal como a listagem.
+- **Organizadores:** o `organizadorId` guardado nos eventos referencia uma entidade de domínio, não uma conta autenticada. Não associar automaticamente contas a organizadores por nome ou email. CRUD de organizadores permanece sob Administrador até existir ligação formal.
+- **Classificações:** as rotas geral e por torneio estão na allowlist GET e expõem resultados calculados a partir dos jogos. Não foi encontrado um campo de publicação/visibilidade no modelo de evento que permita restringir automaticamente resultados ainda não publicados. A exposição pública continua a ser uma decisão provisória que precisa de validação funcional.
+- **Interface web:** `/hub` e `/publico` são leituras públicas allowlisted. Páginas `/organizador`, `/gestor-equipa`, `/jogador` e `/patrocinadores`, bem como a operação de formulário `POST /patrocinadores/financiar`, continuam protegidas pela política provisória de Administrador.
+
+### Decisões funcionais ainda necessárias
+
+1. Definir se o Gestor de Equipa pode submeter e gerir inscrições da sua equipa, se o Organizador aprova, ou se a operação pertence apenas a um dos papéis.
+2. Definir se classificações e chaveamentos são públicos antes, durante e depois de um evento, ou se dependem de estado de publicação.
+3. Definir e implementar ligações explícitas conta-jogador, conta-patrocinador e conta-organizador antes de permitir acesso individual.
+4. Manter pavilhões, gestão de organizadores e restantes entidades globais sob Administrador até haver uma necessidade funcional e um modelo de âmbito comprovados.
+
+A aplicação continua impedida de arrancar com `APP_ENV=production`. A implementação incremental de permissões não equivale a validação integral de todas as rotas nem autoriza remover a barreira.
