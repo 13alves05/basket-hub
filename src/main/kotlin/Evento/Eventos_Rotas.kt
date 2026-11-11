@@ -1,5 +1,7 @@
 package com.est.Evento
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import com.est.DBUtils.DatabaseCreation
 import io.ktor.http.HttpStatusCode
@@ -12,6 +14,7 @@ fun Application.Eventos_Rotas() {
     val service = EventoService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         route("/eventos") {
 
             // Criar evento (Torneio, Amigavel ou ClinicaDeTreino - ver campo "type" no JSON)
