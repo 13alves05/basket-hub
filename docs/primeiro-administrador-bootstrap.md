@@ -100,3 +100,18 @@ A documentação operacional deve explicar como gerar, configurar e remover o se
 - A aplicação continua a recusar `APP_ENV=production`.
 - O código atual não tem autenticação, contas, hash de palavra-passe, papéis persistidos nem sessões.
 - Este documento especifica o provisionamento; não afirma que o endpoint ou o sistema de autenticação já estejam implementados.
+
+
+## Estado de implementação (2026-11-11)
+
+A implementação inicial já existe na branch `feature/admin-bootstrap-security`:
+- `POST /auth/bootstrap` aceita o token Bearer e os dados iniciais da conta.
+- O endpoint só responde em `APP_ENV=development`; permanece indisponível noutros ambientes.
+- O token configurado tem de ter pelo menos 32 bytes.
+- A criação da conta, atribuição do papel Administrador, estado de bootstrap e auditoria é feita numa transação.
+- As palavras-passe são armazenadas com Argon2id; não são guardadas em texto simples.
+- O estado de bootstrap é persistido e a chave primária impede duas inicializações concorrentes.
+
+Testes unitários do hashing Argon2id e build Gradle passaram no CI do commit `2ed1e42`.
+
+Ainda falta testar o endpoint e o comportamento transacional em integração, implementar login/sessões/logout, proteger todas as rotas por papel e âmbito, validar CSRF se forem usadas cookies e concluir a revisão HTTPS/limitação de tentativas. A barreira de produção mantém-se ativa. Esta implementação inicial não deve ser interpretada como autorização para publicar a aplicação.
