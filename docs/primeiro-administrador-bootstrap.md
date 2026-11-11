@@ -115,3 +115,17 @@ A implementação inicial já existe na branch `feature/admin-bootstrap-security
 Testes unitários do hashing Argon2id e build Gradle passaram no CI do commit `2ed1e42`.
 
 Ainda falta testar o endpoint e o comportamento transacional em integração, implementar login/sessões/logout, proteger todas as rotas por papel e âmbito, validar CSRF se forem usadas cookies e concluir a revisão HTTPS/limitação de tentativas. A barreira de produção mantém-se ativa. Esta implementação inicial não deve ser interpretada como autorização para publicar a aplicação.
+
+
+## Estado atualizado (2026-11-11)
+
+Além do bootstrap, a branch já contém:
+- `POST /auth/login`, com resposta Bearer e expiração de 8 horas.
+- `GET /auth/me`, para consultar a identidade e os papéis da sessão.
+- `POST /auth/logout`, com revogação persistente.
+- Tokens aleatórios de 256 bits; a base de dados guarda apenas SHA-256 do token.
+- Auditoria de login bem-sucedido e revogação.
+
+Os testes de bootstrap e sessão, bem como o build Gradle, passaram no CI do commit `4fd9969` (run `43058203577`).
+
+Continuam pendentes a proteção de todas as rotas de negócio por autenticação, papel e âmbito, testes negativos de autorização, limitação de tentativas de login, recuperação de conta e revisão operacional de HTTPS/proxy/CORS. O arranque em produção continua bloqueado.
