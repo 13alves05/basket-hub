@@ -103,6 +103,29 @@ class AuthorizationServiceTest {
     }
 
     @Test
+    fun organizerCanAccessOnlyTheAssignedEventScope() = runBlocking {
+        val database = newDatabase()
+        SecuritySchema.create(database)
+        val accountId = UUID.randomUUID().toString()
+        createAccount(
+            database,
+            accountId,
+            roles = listOf("ORGANIZADOR"),
+            scopedRole = "ORGANIZADOR",
+            scopeType = "EVENTO",
+            scopeId = "evento-21"
+        )
+
+        val authorization = AuthorizationService(database)
+        assertTrue(authorization.canAccess(accountId, "ORGANIZADOR", "EVENTO", "evento-21"))
+        assertFalse(authorization.canAccess(accountId, "ORGANIZADOR", "EVENTO", "evento-22"))
+        assertEquals(
+            setOf("evento-21"),
+            authorization.accessibleScopeIds(accountId, "ORGANIZADOR", "EVENTO")
+        )
+    }
+
+    @Test
     fun administratorHasGlobalAccessWithoutResourceScope() = runBlocking {
         val database = newDatabase()
         SecuritySchema.create(database)
