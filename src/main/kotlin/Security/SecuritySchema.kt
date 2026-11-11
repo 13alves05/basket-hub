@@ -20,6 +20,10 @@ object Accounts : Table("accounts") {
     val updatedAt = long("updated_at")
 
     override val primaryKey = PrimaryKey(id)
+
+    init {
+        uniqueIndex("uq_accounts_email_normalized", emailNormalized)
+    }
 }
 
 object Roles : Table("roles") {
@@ -46,6 +50,10 @@ object RoleScopes : Table("role_scopes") {
     val createdAt = long("created_at")
 
     override val primaryKey = PrimaryKey(id)
+
+    init {
+        uniqueIndex("uq_role_scopes_assignment", accountId, roleCode, scopeType, scopeId)
+    }
 }
 
 object AuthSessions : Table("auth_sessions") {
@@ -57,6 +65,10 @@ object AuthSessions : Table("auth_sessions") {
     val revokedAt = long("revoked_at").nullable()
 
     override val primaryKey = PrimaryKey(id)
+
+    init {
+        uniqueIndex("uq_auth_sessions_token_hash", tokenHash)
+    }
 }
 
 object SystemSecurityState : Table("system_security_state") {
