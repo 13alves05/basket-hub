@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.r2dbc.*
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -76,6 +77,10 @@ class AuthorizationServiceTest {
         val authorization = AuthorizationService(database)
         assertTrue(authorization.canAccess(accountId, "GESTOR_EQUIPA", "EQUIPA", "equipa-10"))
         assertFalse(authorization.canAccess(accountId, "GESTOR_EQUIPA", "EQUIPA", "equipa-11"))
+        assertEquals(
+            setOf("equipa-10"),
+            authorization.accessibleScopeIds(accountId, "GESTOR_EQUIPA", "EQUIPA")
+        )
     }
 
     @Test
@@ -106,5 +111,9 @@ class AuthorizationServiceTest {
 
         val authorization = AuthorizationService(database)
         assertTrue(authorization.canAccess(accountId, "GESTOR_EQUIPA", "EQUIPA", "any-team"))
+        assertEquals(
+            null,
+            authorization.accessibleScopeIds(accountId, "GESTOR_EQUIPA", "EQUIPA")
+        )
     }
 }
