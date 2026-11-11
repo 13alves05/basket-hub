@@ -28,7 +28,7 @@ object Accounts : Table("accounts") {
     }
 }
 
-object Roles : Table("roles") {
+object Roles : Table("security_roles") {
     val code = varchar("code", 40)
     val description = varchar("description", 160)
 
