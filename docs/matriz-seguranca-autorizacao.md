@@ -402,7 +402,7 @@ A rota `/jogos` deixou de depender da guarda global provisória e passou a aplic
 - Organizador só pode listar jogos dos eventos atribuídos ao seu papel `ORGANIZADOR`.
 - Consulta individual, criação, atualização e remoção validam o âmbito do evento associado ao jogo.
 - A atualização não pode transferir um jogo para outro evento.
-- A criação/atualização valida também que o pavilhão corresponde ao pavilhão do evento e que as equipas estão inscritas nesse evento. Isto evita que um Organizador injete equipas de outro torneio através do payload.
+- A criação/atualização valida também que o pavilhão corresponde ao pavilhão do evento. Para Torneios, valida ainda que as equipas estão inscritas nesse evento, evitando injeção de equipas de outro torneio. Eventos Amigáveis não são bloqueados por falta de inscrições, preservando a possibilidade de jogos amigáveis com equipas existentes.
 - Utilizadores sem sessão recebem 401; contas sem papel/âmbito de Organizador recebem 403.
 
 A política continua conservadora: a leitura pública do chaveamento permanece na allowlist existente e não foi alterada. O endpoint de chaveamento é apenas GET nesta rota; não foi criada uma operação de geração/avanço de rondas que não existia na superfície HTTP inspecionada.
