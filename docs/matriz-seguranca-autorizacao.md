@@ -124,3 +124,24 @@ Só considerar remover a barreira de arranque depois de:
 - `src/main/kotlin/Organizador/Organizadores_Rotas.kt`
 - `src/main/kotlin/Patrocinador/Patrocinador_Rotas.kt`
 - `src/main/kotlin/Pavilhao/Pavilhao_Rotas.kt`
+
+
+## Auditoria da opção A — reutilização do projeto de grupo (2026-11-11)
+
+Foi feita comparação do repositório individual com `bmgoliveira-UA/basket-hub`, incluindo as referências `main` e `master`, o histórico de commits disponível e o código-fonte Kotlin encontrado na `master`.
+
+Resultado:
+- Não foi encontrada implementação funcional de autenticação no código analisado do projeto de grupo.
+- `main.kt` limita-se a configurar plugins, inicializar a base de dados e registar rotas; não instala autenticação nem middleware de autorização.
+- `FrontendRotas.kt` regista páginas e operações diretamente, sem verificar uma sessão ou identidade autenticada.
+- `Routing.kt` permite resolver páginas Thymeleaf por parâmetro de URL; o parâmetro `perfil` é lido da query string e não representa uma identidade autenticada nem uma autorização segura.
+- `Http.kt` configura CORS e permite `anyHost()`; não implementa autenticação. A configuração não deve ser copiada para produção.
+- `UsersService.kt` contém apenas um serviço de demonstração com `name` e `age`; não guarda credenciais, papéis ou sessões.
+- O histórico de commits disponível não revelou commits dedicados a login/autenticação.
+- A árvore da `master` contém um gitlink chamado `basket-hub`, mas não foi encontrado `.gitmodules` que identifique o repositório de origem; por isso, esse ponteiro não foi considerado uma implementação verificável nem foi importado.
+
+Conclusão:
+- A opção A foi concluída como auditoria: não existe, nas versões e ficheiros verificáveis, um sistema de autenticação seguro que possa ser reaproveitado.
+- Não copiar o serviço `ExposedUserService`, o parâmetro `perfil` ou a configuração CORS como substitutos de autenticação.
+- Próximo passo necessário: escolher um processo seguro para provisionar o primeiro Administrador. A alternativa recomendada é um segredo de bootstrap de uso único, fornecido apenas por variável de ambiente, que cria a primeira conta administrativa e fica inutilizável após sucesso. O registo público continua desativado.
+- Manter o bloqueio de arranque em produção até à implementação e validação integral da autenticação e autorização.
