@@ -292,3 +292,48 @@ Esta política é deliberadamente conservadora e temporária. **Não implementa 
 Foi acrescentado um teste HTTP de integração para validar os resultados 401/403/200 e a disponibilidade da leitura pública de evento. A validação CI deste novo teste está pendente.
 
 A barreira `APP_ENV=production` permanece ativa. Não remover até existir autorização específica por operação, testes HTTP/IDOR e revisão operacional.
+
+
+## Progresso de autorização por âmbito — revisão seguinte (2026-11-11)
+
+### Validação de equipa e evento
+
+- A primitiva `AuthorizationService` passou a ser usada diretamente nas rotas de equipa.
+- O Gestor de Equipa autenticado só consulta a lista das equipas atribuídas e só pode consultar, editar ou remover uma equipa dentro do seu âmbito.
+- A criação de equipas continua reservada ao Administrador.
+- As rotas de evento deixaram de usar a guarda provisória de Administrador em bloco e passaram a verificar sessão e autorização específica.
+- A criação de eventos continua reservada ao Administrador.
+- Um Organizador só pode editar ou remover eventos com âmbito explícito `ORGANIZADOR / EVENTO / id`.
+- A atualização por Organizador não pode alterar o `organizadorId` do evento.
+- As leituras públicas GET de eventos mantêm-se públicas, conforme a allowlist de conteúdo público.
+- Foram acrescentados testes unitários de isolamento de âmbito para Organizador, além dos testes de Gestor de Equipa.
+
+CI:
+- Run 43077492381 (commit `803d129`): testes e build passaram, incluindo a correção de recolha dos âmbitos.
+- Run 43079044414 (commit `1f180d7`): testes e build passaram após a integração das permissões de evento.
+- Run 43079080189 (commit `c5be2eb`): validação do teste adicional de âmbito de Organizador ainda em execução no momento desta atualização.
+
+### Jogadores e patrocinadores — bloqueio de modelação
+
+A inspeção dos modelos atuais não permite implementar com segurança o acesso próprio de Jogador ou Patrocinador:
+
+- `JogadorService.Jogadores` contém apenas nome, posição, número de camisola e ID. Não existe associação persistente entre jogador e equipa, nem entre jogador e conta autenticada.
+- `PatrocinadorService.Patrocinadores` contém nome, empresa, valor de contrato e um `eventoId` opcional. Não existe associação entre patrocinador e conta autenticada.
+- O âmbito `JOGADOR` ou `PATROCINADOR` sozinho não resolve a ligação entre a identidade autenticada e o registo de domínio. Aceitar um ID enviado pelo cliente criaria risco de IDOR/impersonação.
+- Não foi inventada uma relação entre contas, jogadores, equipas ou patrocinadores. Até essa relação ser decidida e persistida, as rotas de jogadores e patrocinadores mantêm a guarda provisória de Administrador, com as leituras públicas apenas quando explicitamente permitidas pela allowlist global.
+
+Decisões de domínio necessárias antes de implementar:
+1. Um jogador é ligado a uma conta por uma associação única conta-jogador? Pode uma conta gerir mais do que um jogador (por exemplo, encarregado de educação)?
+2. Um jogador pertence a uma equipa de cada vez ou pode estar associado a várias equipas/épocas?
+3. Um patrocinador tem uma conta própria ligada a um único registo de patrocinador? Quem pode criar essa ligação e aprová-la?
+4. Um contrato de patrocínio pertence ao patrocinador, ao evento, ou a ambos? Quem pode ver o valor contratual?
+
+Não desbloquear estas rotas por inferência baseada em nome, email, query parameter ou ID recebido do cliente.
+
+### Estado após esta revisão
+
+- Equipa: autorização por âmbito implementada; falta reforçar testes HTTP de isolamento por equipa.
+- Evento: autorização por âmbito implementada para Organizador; falta reforçar testes HTTP de isolamento por evento e rever todas as operações associadas (inscrições, agendamento, jogos).
+- Jogador: ainda sob política provisória de Administrador; falta decidir e implementar a relação conta-jogador/equipa.
+- Patrocinador: ainda sob política provisória de Administrador; falta decidir e implementar a relação conta-patrocinador/contratos.
+- Produção continua bloqueada por `APP_ENV=production`. Não fazer merge nem deploy até terminar a autorização de todas as rotas e a revisão operacional.
