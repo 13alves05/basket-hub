@@ -14,7 +14,7 @@ class AdminBootstrapServiceTest {
     private fun newDatabase(): R2dbcDatabase {
         val databaseName = "security_test_" + UUID.randomUUID().toString().replace("-", "")
         return R2dbcDatabase.connect(
-            url = "r2dbc:h2:mem:///$databaseName",
+            url = "r2dbc:h2:file:///./build/$databaseName",
             user = "sa",
             password = ""
         )
