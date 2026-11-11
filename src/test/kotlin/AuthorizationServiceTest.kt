@@ -24,7 +24,8 @@ class AuthorizationServiceTest {
         roles: List<String>,
         scopedRole: String? = null,
         scopeType: String? = null,
-        scopeId: String? = null
+        scopeId: String? = null,
+        isActive: Boolean = true
     ) {
         val now = System.currentTimeMillis()
         suspendTransaction(database) {
@@ -32,7 +33,7 @@ class AuthorizationServiceTest {
                 it[Accounts.id] = accountId
                 it[Accounts.emailNormalized] = "$accountId@example.com"
                 it[Accounts.passwordHash] = "not-used-in-this-test"
-                it[Accounts.isActive] = true
+                it[Accounts.isActive] = isActive
                 it[Accounts.createdAt] = now
                 it[Accounts.updatedAt] = now
             }
