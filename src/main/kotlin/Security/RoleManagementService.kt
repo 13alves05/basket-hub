@@ -17,7 +17,9 @@ enum class RoleManagementResult {
     ROLE_REQUIRED,
     ALREADY_ASSIGNED,
     NOT_ASSIGNED,
-    LAST_ADMIN_PROTECTED
+    LAST_ADMIN_PROTECTED,
+    INVALID_INPUT,
+    EMAIL_ALREADY_EXISTS
 }
 
 /**
@@ -26,6 +28,46 @@ enum class RoleManagementResult {
  */
 class RoleManagementService(private val database: R2dbcDatabase) {
     private val supportedScopeTypes = setOf("EVENTO", "EQUIPA", "JOGADOR", "PATROCINADOR")
+    private val emailPattern = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
+
+    suspend fun createAccount(
+        actorAccountId: String,
+        email: String,
+        initialPassword: String
+    ): Pair<RoleManagementResult, String?> = suspendTransaction(database) {
+        if (!isActiveAdministrator(actorAccountId)) {
+            return@suspendTransaction RoleManagementResult.FORBIDDEN to null
+        }
+
+        val normalizedEmail = email.trim().lowercase()
+        if (!emailPattern.matches(normalizedEmail) || initialPassword.length < 12) {
+            return@suspendTransaction RoleManagementResult.INVALID_INPUT to null
+        }
+
+        val emailExists = Accounts
+            .selectAll()
+            .where { Accounts.emailNormalized eq normalizedEmail }
+            .limit(1)
+            .map { it[Accounts.id] }
+            .singleOrNull() != null
+        if (emailExists) {
+            return@suspendTransaction RoleManagementResult.EMAIL_ALREADY_EXISTS to null
+        }
+
+        val accountId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        val passwordHash = PasswordHasher.hash(initialPassword)
+        Accounts.insert {
+            it[Accounts.id] = accountId
+            it[Accounts.emailNormalized] = normalizedEmail
+            it[Accounts.passwordHash] = passwordHash
+            it[Accounts.isActive] = true
+            it[Accounts.createdAt] = now
+            it[Accounts.updatedAt] = now
+        }
+        audit(actorAccountId, "ACCOUNT_CREATED", "ACCOUNT", accountId, now)
+        RoleManagementResult.SUCCESS to accountId
+    }
 
     suspend fun assignRole(
         actorAccountId: String,
