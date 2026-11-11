@@ -43,11 +43,13 @@ class BusinessRouteSecurityIntegrationTest {
 
         val sessions = SessionService(database)
         val administratorLogin = sessions.login("admin@example.com", "BasketHub-Seguro-2026")
-        val administratorToken = administratorLogin.second!!.token
+        val administratorSession = administratorLogin.second ?: error("Administrador sem sessão.")
+        val administratorId = administratorSession.account.accountId
+        val administratorToken = administratorSession.token
 
         val management = RoleManagementService(database)
         val (createResult, visitorId) = management.createAccount(
-            administratorLogin.second.account.accountId,
+            administratorId,
             "visitor@example.com",
             "Visitor-Password-2026"
         )
@@ -56,13 +58,13 @@ class BusinessRouteSecurityIntegrationTest {
         assertEquals(
             RoleManagementResult.SUCCESS,
             management.assignRole(
-                administratorLogin.second.account.accountId,
+                administratorId,
                 accountId,
                 "VISITANTE"
             )
         )
         val visitorLogin = sessions.login("visitor@example.com", "Visitor-Password-2026")
-        val visitorToken = visitorLogin.second!!.token
+        val visitorToken = visitorLogin.second?.token ?: error("Visitante sem sessão.")
 
         TestCredentials(database, administratorToken, visitorToken)
     }
