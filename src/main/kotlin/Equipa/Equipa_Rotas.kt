@@ -1,5 +1,7 @@
 package com.est.Equipa
 
+import com.est.Security.SessionService
+import com.est.Security.enforceTemporaryAdministratorPolicy
 import com.est.DBUtils.DBUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -11,6 +13,7 @@ fun Application.Equipas_Rotas() {
     val equipaService = EquipaService(DBUtils.database)
 
     routing {
+        enforceTemporaryAdministratorPolicy(SessionService(DBUtils.database))
         post("/equipas") {
             try {
                 val equipa = call.receive<Equipa>()
