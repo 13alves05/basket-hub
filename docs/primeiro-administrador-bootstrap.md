@@ -129,3 +129,10 @@ Além do bootstrap, a branch já contém:
 Os testes de bootstrap e sessão, bem como o build Gradle, passaram no CI do commit `4fd9969` (run `43058203577`).
 
 Continuam pendentes a proteção de todas as rotas de negócio por autenticação, papel e âmbito, testes negativos de autorização, limitação de tentativas de login, recuperação de conta e revisão operacional de HTTPS/proxy/CORS. O arranque em produção continua bloqueado.
+
+
+## Autorização por âmbito — estado (2026-11-11)
+
+Foi criada uma primitiva `AuthorizationService` que exige o papel solicitado e um âmbito correspondente para o mesmo papel/recurso; Administradores ativos têm acesso global e contas inativas são recusadas. Os testes de isolamento de papéis e recursos passaram no CI do commit `a68372a` (run `43059768612`).
+
+Esta primitiva ainda não está aplicada às rotas de negócio. A aplicação continua bloqueada em produção até a autorização por rota e os testes de acesso cruzado estarem concluídos.
