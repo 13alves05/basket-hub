@@ -74,6 +74,14 @@ class AuthorizationService(private val database: R2dbcDatabase) {
 
     suspend fun hasGlobalRole(accountId: String, roleCode: String): Boolean =
         suspendTransaction(database) {
+            val active = Accounts
+                .selectAll()
+                .where { (Accounts.id eq accountId) and (Accounts.isActive eq true) }
+                .limit(1)
+                .map { it[Accounts.id] }
+                .singleOrNull() != null
+            if (!active) return@suspendTransaction false
+
             AccountRoles
                 .selectAll()
                 .where {
