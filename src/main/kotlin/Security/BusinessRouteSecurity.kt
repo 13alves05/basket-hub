@@ -54,7 +54,7 @@ fun Route.enforceTemporaryAdministratorPolicy(sessionService: SessionService) {
  * their endpoint performs an explicit role-and-resource-scope authorization check.
  */
 internal fun isDelegatedScopedWrite(method: HttpMethod, path: String): Boolean =
-    method == HttpMethod.Post && path.matches(Regex("^/eventos/\\\\d+/agendamento$"))
+    method == HttpMethod.Post && path.matches(Regex("^/eventos/\\d+/agendamento$"))
 
 internal fun isPublicRead(method: HttpMethod, path: String): Boolean {
     if (method != HttpMethod.Get) return false
