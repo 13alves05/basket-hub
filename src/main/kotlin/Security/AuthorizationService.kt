@@ -19,6 +19,17 @@ class AuthorizationService(private val database: R2dbcDatabase) {
         scopeType: String,
         scopeId: String
     ): Boolean = suspendTransaction(database) {
+        val accountIsActive = Accounts
+            .selectAll()
+            .where { Accounts.id eq accountId }
+            .limit(1)
+            .map { it[Accounts.isActive] }
+            .singleOrNull() == true
+
+        if (!accountIsActive) {
+            return@suspendTransaction false
+        }
+
         val hasAdministratorRole = AccountRoles
             .selectAll()
             .where {
