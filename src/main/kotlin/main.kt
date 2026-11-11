@@ -19,7 +19,7 @@ import com.est.Inscricao.Inscricao_Rotas
 import kotlinx.coroutines.runBlocking
 
 /**
- * Esta versão ainda não tem autenticação/autorização nas rotas de gestão.
+ * As rotas de negócio ainda não têm autorização por papel e âmbito.
  * Falha de forma segura se alguém tentar iniciá-la como serviço de produção.
  */
 internal fun ensureDeploymentEnvironmentIsSupported(environment: String?) {
