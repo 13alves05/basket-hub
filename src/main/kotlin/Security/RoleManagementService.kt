@@ -102,8 +102,15 @@ class RoleManagementService(private val database: R2dbcDatabase) {
                 .where { AccountRoles.roleCode eq "ADMINISTRADOR" }
                 .map { it[AccountRoles.accountId] }
                 .toList()
-                .distinct()
-            if (administratorIds.size <= 1) {
+                .toSet()
+            val activeAccountIds = Accounts
+                .selectAll()
+                .where { Accounts.isActive eq true }
+                .map { it[Accounts.id] }
+                .toList()
+                .toSet()
+            val activeAdministratorCount = administratorIds.intersect(activeAccountIds).size
+            if (activeAdministratorCount <= 1) {
                 return@suspendTransaction RoleManagementResult.LAST_ADMIN_PROTECTED
             }
         }
@@ -111,6 +118,12 @@ class RoleManagementService(private val database: R2dbcDatabase) {
         AccountRoles.deleteWhere {
             (AccountRoles.accountId eq targetAccountId) and
                 (AccountRoles.roleCode eq roleCode)
+        }
+        // Remove old scopes with the role so a future re-assignment cannot
+        // silently reactivate permissions that had already been revoked.
+        RoleScopes.deleteWhere {
+            (RoleScopes.accountId eq targetAccountId) and
+                (RoleScopes.roleCode eq roleCode)
         }
         val now = System.currentTimeMillis()
         audit(actorAccountId, "ROLE_REMOVED", "ACCOUNT_ROLE", "$targetAccountId:$roleCode", now)
