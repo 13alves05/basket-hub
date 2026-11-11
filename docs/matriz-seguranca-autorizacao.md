@@ -388,7 +388,7 @@ A allowlist de `BusinessRouteSecurity.kt` permite apenas GETs exatos de páginas
 ### Próxima sequência recomendada
 
 1. Adicionar testes HTTP reais às rotas de equipa e evento para comprovar isolamento entre dois âmbitos distintos, não apenas testar a primitiva de autorização.
-2. Implementar autorização por evento em agendamento/jogos, preservando as regras de publicação das leituras públicas.
+2. Adicionar testes HTTP/IDOR a jogos e ao endpoint de geração/avanço do chaveamento; preservar as regras de publicação das leituras públicas.
 3. Decidir e testar a regra de autorização de inscrições (equipa, evento ou ambos) antes de alterar as rotas.
 4. Resolver as relações de conta-jogador, conta-patrocinador e conta-organizador antes de abrir os respetivos recursos.
 5. Manter CRUD de pavilhões e gestão global de entidades sob Administrador.
@@ -405,6 +405,8 @@ A rota `/jogos` deixou de depender da guarda global provisória e passou a aplic
 - A criação/atualização valida também que o pavilhão corresponde ao pavilhão do evento. Para Torneios, valida ainda que as equipas estão inscritas nesse evento, evitando injeção de equipas de outro torneio. Eventos Amigáveis não são bloqueados por falta de inscrições, preservando a possibilidade de jogos amigáveis com equipas existentes.
 - Utilizadores sem sessão recebem 401; contas sem papel/âmbito de Organizador recebem 403.
 
-A política continua conservadora: a leitura pública do chaveamento permanece na allowlist existente e não foi alterada. O endpoint de chaveamento é apenas GET nesta rota; não foi criada uma operação de geração/avanço de rondas que não existia na superfície HTTP inspecionada.
+A leitura pública do chaveamento permanece na allowlist GET existente. A operação de geração/avanço existe em `POST /eventos/{id}/agendamento`, registada em `FrontendRotas.kt` (não em `Agendamento_Rotas.kt`). Esta operação deixou de herdar a restrição provisória exclusiva de Administrador e passou a validar sessão e âmbito: Administrador tem acesso global; Organizador necessita de âmbito `ORGANIZADOR / EVENTO / {id}`. A exceção à guarda provisória é limitada ao método POST e ao padrão exato desta rota; a autorização efetiva é executada no handler.
 
-**Limitação de validação:** esta alteração ainda precisa de testes HTTP/IDOR dedicados para jogos com dois eventos e dois Organizadores, incluindo tentativa de alterar o `eventoId`, usar equipas de outro evento e consultar jogos fora do âmbito. A execução CI do commit desta implementação deve ser verificada antes de considerar o trabalho validado.
+A rota devolve 401 sem sessão, 403 sem papel/âmbito, 404 se o evento não existir e 409 quando o torneio não permite gerar/avançar a ronda no estado atual.
+
+**Limitação de validação:** a alteração tem testes unitários para garantir que apenas o POST exato é delegado ao handler, mas ainda precisa de testes HTTP/IDOR com dois Organizadores e dois eventos. Os testes devem comprovar geração permitida no evento atribuído, negação no evento alheio, negação sem sessão e acesso global do Administrador. Os testes HTTP/IDOR de jogos também continuam pendentes.
